@@ -49,14 +49,16 @@ docker-compose up -d
 
 ### Inital Setup Config
 #### All Service URL
-Gitlab
+```
+# Gitlab
 https://gitlab.example.com:10443/
-Jenkins
+# Jenkins
 http://jenkins.example.com:8080/jenkins
-SonarQube
+# SonarQube
 http://sonarqube.example.com:9000/
-Grafana Dashboard
+# Grafana Dashboard
 http://localhost:3000/
+```
 
 ### Jenkins initial Setup
 1. Access Jenkins via browser
@@ -73,19 +75,21 @@ sudo cat /var/jenkins_home/secrets/initialAdminPassword
 ### Install required jenkins plugins
 1. Access jenkin plugin menu via Manage Jenkins > Click Plugins > Click Available plugins 
 2. Search list of plugin by this keyword:
-    GitLab API Plugin
-    Gitlab Authentication plugin
-    Gitlab Plugin
-    Docker
-    Docker Commons
-    Docker Pipeline
-    Docker API
-    docker-build-step
-    Eclipse Temurin installer
-    NodeJS
-    OWASP Dependency-Check
-    SonarQube Scanner
-    Email Extension Plugin
+```
+GitLab API Plugin
+Gitlab Authentication plugin
+Gitlab Plugin
+Docker
+Docker Commons
+Docker Pipeline
+Docker API
+docker-build-step
+Eclipse Temurin installer
+NodeJS
+OWASP Dependency-Check
+SonarQube Scanner
+Email Extension Plugin
+```
 3. Check all list of plugin > Click Install
 
 ### Gitlab initial Setup
@@ -103,24 +107,29 @@ sudo cat /var/jenkins_home/secrets/initialAdminPassword
 3. Create via Administration > Security > Users > Click on Tokens and Update Token > Fill with jenkins-auth > and click on Generate Token > Click Copy 
 4. Create webhook Access via Dashboard > Administration > Configuration > Webhooks > Click Create
 5. Fill with this data 
-   Name : jenkins-server
-   URL : http://jenkins.example.com:8080/jenkins/sonarqube-webhook/
+```
+Name : jenkins-server
+URL : http://jenkins.example.com:8080/jenkins/sonarqube-webhook/
+```
 6. Click Save
 
 ### Setup sonarqube & gitlab access in jenkins
+```
+# Set Sonarcube token
 1. Access Jenkins via browser
-2. Manage Jenkins –> Credentials –> Click global –> Click Add credential
+2. Manage Jenkins > Credentials > Click global > Click Add credential
 3. Select Secret Text for Kind & Global for Scope
 4. Insert Sonar-token in ID field text
 5. Paste the sonarqube access token in Secret field
 6. Click Save
-
-1. Manage Jenkins –> Credentials –> Click global –> Click Add credential
+# Set Gitlab API access token
+1. Manage Jenkins > Credentials > Click global > Click Add credential
 2. Select Gitlab API token for Kind & Global for Scope
 3. Paste the sonarqube access token in Secret field
 4. Insert gitlab-access-token in ID field text
 5. Paste the gitlab access token in Secret field
 6. Click Save
+```
 
 ### Setup Monorepo App with Nx
 ```bash
