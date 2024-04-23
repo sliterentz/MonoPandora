@@ -123,6 +123,8 @@ services:
     restart: always
     networks:
       - sonarnet
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_USER=$POSTGRES_USER
       - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
@@ -148,6 +150,14 @@ services:
       - DB_NAME=$MONGO_DB
     command:
       mongod --quiet --logpath /dev/null
+
+  redis:
+    container_name: local_redis
+    image: redis:latest
+    networks:
+      - sonarnet
+    ports:
+      - "6379:6379"
 
   loki:
     container_name: local_loki
