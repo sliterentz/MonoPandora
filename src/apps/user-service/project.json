@@ -1,0 +1,24 @@
+{
+  "name": "user-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/user-service/src",
+  "projectType": "application",
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "user-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "user-service:build:development"
+        },
+        "production": {
+          "buildTarget": "user-service:build:production"
+        }
+      }
+    }
+  },
+  "tags": []
+}
