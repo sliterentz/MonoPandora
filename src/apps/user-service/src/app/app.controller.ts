@@ -2,7 +2,7 @@ import { Controller, Get, Post, Render, Res, Body } from '@nestjs/common';
 
 import { AppService } from './app.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from "../entites";
+import { User } from "../entities";
 
 @Controller()
 export class AppController {

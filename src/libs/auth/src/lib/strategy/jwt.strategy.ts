@@ -4,7 +4,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { AUTH_OPTIONS, JWT_SECRET } from "../types/constants";
 import { AuthModuleOption } from "../auth-apikey.strategy";
 import { JwtPayloadInterface } from '../interfaces';
-import { UserEntity } from '../entites';
+import { UserEntity } from '../entities';
 import { AuthService } from '../auth.service';
 
 export type JwtPayload = { sub: number; username: string };

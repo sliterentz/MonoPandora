@@ -16,7 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@auth-lib": ["libs/auth/src/index.ts"]
-    }
+    },
+    "outDir": "./dist",
   },
-  "exclude": ["node_modules", "tmp"]
+  "exclude": ["node_modules", "tmp"],
+  "include": ["migrations/**/*.ts"]
 }
