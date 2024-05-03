@@ -1,0 +1,74 @@
+{
+  "name": "user-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/user-service/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "development",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/user-service",
+        "main": "apps/user-service/src/main.ts",
+        "tsConfig": "apps/user-service/tsconfig.app.json",
+        "assets": ["apps/user-service/src/assets"],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/user-service/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "user-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "user-service:build:development"
+        },
+        "production": {
+          "buildTarget": "user-service:build:production"
+        }
+      }
+    },
+    "build-migration-config": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{option.outputPath}"],
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/db/migrations",
+        "main": "apps/user-service/src/typeorm.config.ts",
+        "tsConfig": "apps/user-service/tsconfig.app.json",
+        "isolatedConfig": true,
+        "webpackConfig": "apps/user-service/webpack.config.js"
+      }
+    },
+    "typeorm-generate-migrations": {
+      "executor": "nx:run-commands",
+      "outputs": ["{option.outputPath}"],
+      "options": {
+        "cwd": "apps/user-service/src/migrations",
+        "commands": ["typeorm migration:create"]
+      },
+      "dependsOn": ["build-migration-config"]
+    },
+    "typeorm-run-migrations": {
+      "executor": "nx:run-commands",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "cwd": "apps/user-service/src/migrations",
+        "commands": ["typeorm migration:run"]
+      },
+      "dependsOn": ["build-migration-config"]
+    }
+  },
+  "tags": []
+}
