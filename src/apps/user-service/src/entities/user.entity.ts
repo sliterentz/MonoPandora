@@ -1,8 +1,8 @@
 import { Entity, BaseEntity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 // import BaseEntity from './base.entity';
 
-@Entity()
-export class User extends BaseEntity  {
+@Entity('users')
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -19,7 +19,7 @@ export class User extends BaseEntity  {
   grant!: number;
 
   @Column()
-  authConfirmToken!: string;
+  authConfirmToken!: number;
 
   @Column()
   isVerrified!: boolean;

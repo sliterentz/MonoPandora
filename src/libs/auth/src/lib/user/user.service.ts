@@ -13,7 +13,7 @@ export class UserService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
 ) { this.saltRounds = 10; }
 
-async createUser(payload: AuthModel): Promise<User> {
+  async createUser(payload: AuthModel): Promise<User> {
       const hashPass = await bcrypt.hash(payload.password, this.saltRounds)
 
   const newUserData = {
@@ -52,5 +52,13 @@ async findByEmailWithPassword(email: string | undefined): Promise<UserEntity | n
         },
     });
 }
+
+  async findByConfirmToken(authConfirmToken: number): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: {
+        authConfirmToken,
+      },
+    });
+  }
 
 }

@@ -9,8 +9,11 @@ export class UserModel {
   fullname?: string;
 
   @IsString()
-  password?: string;
+  password?: number;
 
   @IsNumber()
   grant?: IGrant;
+
+  @IsNumber()
+  authConfirmToken?: number;
 }

@@ -15,5 +15,8 @@ export class AuthModel implements types.user.IRegisterUserForm {
   grant!: types.user.IGrant;
 
   @IsNumber()
+  authConfirmToken!: number;
+
+  @IsNumber()
   isVerrified!: number;
 }

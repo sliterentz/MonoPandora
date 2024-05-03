@@ -19,7 +19,7 @@ export class UserEntity {
   grant!: number;
 
   @Column({ select: false, nullable: true })
-  authConfirmToken!: String
+  authConfirmToken!: number;
 
   @Column({ default: false, nullable: true })
   isVerrified!: Boolean;

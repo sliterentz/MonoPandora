@@ -22,6 +22,10 @@ export const UserSchema = new EntitySchema<UserEntity>({
     grant: {
         type: Number,
       },
+    authConfirmToken: {
+      type: Number,
+      default: 123,
+    },
     isVerrified: {
       type: Boolean,
       default: true,

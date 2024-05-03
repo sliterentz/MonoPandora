@@ -19,6 +19,7 @@ services:
   nginx:
     container_name: reverse
     hostname: reverse
+    restart: unless-stopped
     image: nginx:latest
     volumes:
       - 'nginx-config:/etc/nginx'
@@ -37,7 +38,7 @@ services:
       context: .
       dockerfile: .docker/jenkins/Dockerfile
     user: root
-    restart: always
+    restart: unless-stopped
     hostname: 'jenkins.example.com'
     ports:
       - "8080:8080"
@@ -56,7 +57,7 @@ services:
   gitlab:
     container_name: local_gitlab
     image: 'gitlab/gitlab-ce:latest'
-    restart: always
+    restart: unless-stopped
     hostname: 'gitlab.example.com'
     environment:
       GITLAB_OMNIBUS_CONFIG: |
@@ -85,7 +86,7 @@ services:
   gitlab-runner:
     container_name: local_gitlabrunner
     image: 'gitlab/gitlab-runner:latest'
-    restart: always
+    restart: unless-stopped
     depends_on:
       - gitlab
     networks:
@@ -120,7 +121,7 @@ services:
   postgressdb:
     image: postgres:latest
     container_name: local_postgres
-    restart: always
+    restart: unless-stopped
     networks:
       - sonarnet
     ports:
@@ -154,6 +155,7 @@ services:
   redis:
     container_name: local_redis
     image: redis:latest
+    restart: unless-stopped
     networks:
       - sonarnet
     ports:

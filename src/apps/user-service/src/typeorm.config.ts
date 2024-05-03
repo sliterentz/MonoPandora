@@ -1,6 +1,7 @@
 import "reflect-metadata"
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
+import {User} from "./entities";
 
 dotenv.config();
 
@@ -12,7 +13,8 @@ export const dbdatasource: DataSourceOptions = {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME_DEVELOPMENT,
   // url: process.env.DATABASE_URL,
-  entities: ['src/entities/**/*.entity.ts'],
+  // entities: ['src/entities/*.entity.ts'],
+  entities: [User],
   migrations: ['src/migrations/*.{ts,js}'],
   migrationsRun: process.env.TYPEORM_MIGRATION === 'true',
   migrationsTableName: 'migration',

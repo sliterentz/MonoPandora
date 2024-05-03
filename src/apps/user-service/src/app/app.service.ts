@@ -15,24 +15,6 @@ export class AppService {
     ) {
     this.code = Math.floor(10000 + Math.random() * 90000);
   }
-  async signup(user: User): Promise<any> {
-    try {
-      const salt = await bcrypt.genSalt();
-      const hash = await bcrypt.hash(user.password, salt);
-      const reqBody = {
-        fullname: user.fullname,
-        email: user.email,
-        password: hash,
-        grant: user.grant,
-        authConfirmToken: "$2b$10$0dmvsX54k9DxGXaFZjIXPOLc0m6Q8cjc3YdLbuseiyfuYyM/j55mi",
-        isVerrified: user.isVerrified
-      }
-      await this.userRepo.insert(reqBody);
-      return true
-    } catch (e) {
-      return new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
 
   async signin(user: User, jwtService: JwtService): Promise<any> {
     try {

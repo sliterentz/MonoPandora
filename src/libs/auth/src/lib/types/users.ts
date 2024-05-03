@@ -26,5 +26,6 @@ export interface IRegisterUserForm {
     email: string;
     password: string;
     grant: IGrant;
-    isVerrified: number
+    authConfirmToken: number;
+    isVerrified: number;
 }
