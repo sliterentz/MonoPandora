@@ -29,8 +29,8 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         port: 465,
         secure: true,
         auth: {
-          user: 'justdevops99@gmail.com',
-          pass: 'ijkp nmsu svfj yidx',
+          user: process.env.MAIL_USERNAME,
+          pass: process.env.MAIL_PASSWORD,
         },
       },
       defaults: {
