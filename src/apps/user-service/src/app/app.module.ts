@@ -1,26 +1,44 @@
 import { Module } from '@nestjs/common';
-
+import { APP_GUARD } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UserEntity as User } from "@auth-lib";
+import { dbdatasource } from '../typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RegisterModule } from "../../register/register.module";
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from "../entities";
+import { AuthModule } from "@auth-lib";
 import { JwtModule } from '@nestjs/jwt';
-import { dbdatasource } from '../typeorm.config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from '@auth-lib';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes ConfigModule globally available
+      envFilePath: '.env', // Specify the path to your .env file
+    }),
     TypeOrmModule.forRoot(dbdatasource),
     TypeOrmModule.forFeature([User]),
-    JwtModule.register({
-      secret: process.env['JWT_SECRET'],
-        // signOptions: {
-        //   algorithm: 'RS256',
-        // }
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        return {
+          secret: configService.get<string>('JWT_SECRET'),
+          signOptions: {
+            expiresIn: configService.get<string | number>('JWT_EXPIRES_IN'),
+          },
+        };
+      },
+      inject: [ConfigService],
     }),
-    RegisterModule
-  ],
+    AuthModule,
+    ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
