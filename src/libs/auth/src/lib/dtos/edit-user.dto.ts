@@ -1,7 +1,7 @@
 import { IsEmail, IsEnum, IsNumber, IsOptional, IsString, MaxLength, isString } from 'class-validator';
-import { user } from '../types';
+import { IRegisterUserForm } from '../types';
 
-export class EditUserDTO implements user.IRegisterUserForm {
+export class EditUserDTO implements IRegisterUserForm {
     @IsString()
     @MaxLength(20)
     fullname: string;

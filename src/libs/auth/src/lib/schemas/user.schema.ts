@@ -6,7 +6,7 @@ export const UserSchema = new EntitySchema<User>({
   target: User,
   columns: {
     id: {
-      type: Number,
+      type: String,
       primary: true,
       generated: true,
     },

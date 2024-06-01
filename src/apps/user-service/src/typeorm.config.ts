@@ -1,7 +1,8 @@
-import "reflect-metadata"
+import "reflect-metadata";
 import { DataSource, DataSourceOptions } from 'typeorm';
+// import { User, RefreshToken } from './entities';
+import { RefreshTokenEntity as RefreshToken, UserEntity as User } from "@auth-lib";
 import * as dotenv from 'dotenv';
-import {User} from "./entities";
 
 dotenv.config();
 
@@ -13,18 +14,18 @@ export const dbdatasource: DataSourceOptions = {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME_DEVELOPMENT,
   // url: process.env.DATABASE_URL,
-  // entities: ['src/entities/*.entity.ts'],
-  entities: [User],
-  migrations: ['src/migrations/*.{ts,js}'],
+  entities: [User, RefreshToken],
+  // entities: ['../apps/user-service/src/entities/*.entity.ts'],
+  migrations: ['../apps/user-service/src/migrations/*.{ts,js}'],
   migrationsRun: process.env.TYPEORM_MIGRATION === 'true',
   migrationsTableName: 'migration',
   synchronize: process.env.TYPEORM_MIGRATION === 'true',
-  extra: {
-    ssl:
-      process.env.NODE_ENV === 'production'
-        ? { rejectUnauthorized: false }
-        : false,
-  },
+  // extra: {
+  //   ssl:
+  //     process.env.NODE_ENV === 'production'
+  //       ? { rejectUnauthorized: false }
+  //       : false,
+  // },
 };
 
 // const dataSource = new DataSource(dbdatasource);

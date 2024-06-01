@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from "./auth.service";
 import { JwtStrategy } from "./strategy/jwt.strategy";
+import { RefreshTokenStrategy } from './strategy/refresh-token.strategy';
 import { AuthController } from './auth.controller';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
@@ -57,7 +58,7 @@ dotenv.config();
     PassportModule
   ],
   controllers: [AuthController],
-  providers: [JwtStrategy, AuthService, JwtAuthGuard, Reflector],
+  providers: [JwtStrategy, RefreshTokenStrategy, AuthService, JwtAuthGuard,  Reflector],
   exports: [AuthService, PassportModule, JwtAuthGuard],
 })
 export class AuthModule {}

@@ -1,7 +1,7 @@
 import {IsEmail, IsString, IsEnum, IsNumber} from 'class-validator';
-import { types } from '@auth-lib';
+import { IRegisterUserForm, IGrant } from '../types';
 
-export class AuthModel implements types.user.IRegisterUserForm {
+export class AuthModel implements IRegisterUserForm {
   @IsString()
   fullname!: string;
 
@@ -11,8 +11,8 @@ export class AuthModel implements types.user.IRegisterUserForm {
   @IsString()
   password!: string;
 
-  @IsEnum(types.user.IGrant)
-  grant!: types.user.IGrant;
+  @IsEnum(IGrant)
+  grant!: IGrant;
 
   @IsNumber()
   authConfirmToken!: number;

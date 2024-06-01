@@ -1,7 +1,9 @@
 import { IAccessToken } from '../types';
-import { IsString } from 'class-validator';
+import { IsJWT, IsString, IsNotEmpty } from 'class-validator';
 
 export class ProfileRequestDTO {
   @IsString()
+  @IsNotEmpty()
+  @IsJWT()
   accessToken: string;
 }

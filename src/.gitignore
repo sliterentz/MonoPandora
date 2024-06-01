@@ -7,6 +7,7 @@ tmp
 
 # dependencies
 node_modules
+*.env
 
 # IDEs and editors
 /.idea
@@ -45,5 +46,8 @@ Thumbs.db
 build/
 tmp/
 temp/
+
+# Log
+logs/
 
 storybook-static

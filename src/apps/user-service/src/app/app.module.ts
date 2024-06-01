@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity as User } from "@auth-lib";
+import { RefreshTokenEntity as RefreshToken, UserEntity as User } from "@auth-lib";
 import { dbdatasource } from '../typeorm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -9,17 +9,18 @@ import { AuthModule } from "@auth-lib";
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '@auth-lib';
+import { LoggmaModule } from '@nestjs-logger/shared/lib/loggma.module';
+import { ConfigLoggmaModule } from '@nestjs-logger/shared/config/config-loggma.module';
+import { ContextLoggmaModule } from '@nestjs-logger/shared/lib/context/context-loggma.module'
+
+import { LoggmaMorganMiddleware } from '@nestjs-logger/shared/lib/middlewares/loggma-morgan.middleware';
+import { UserRepository } from '@auth-lib';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true, // Makes ConfigModule globally available
-      envFilePath: '.env', // Specify the path to your .env file
-    }),
     TypeOrmModule.forRoot(dbdatasource),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, RefreshToken, UserRepository]),
     JwtModule.registerAsync({
-      imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         return {
           secret: configService.get<string>('JWT_SECRET'),
@@ -31,6 +32,9 @@ import { JwtAuthGuard } from '@auth-lib';
       inject: [ConfigService],
     }),
     AuthModule,
+    LoggmaModule,
+    ConfigLoggmaModule,
+    ContextLoggmaModule
     ],
   controllers: [AppController],
   providers: [
@@ -41,4 +45,8 @@ import { JwtAuthGuard } from '@auth-lib';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(LoggmaMorganMiddleware).forRoutes('*');
+  }
+}

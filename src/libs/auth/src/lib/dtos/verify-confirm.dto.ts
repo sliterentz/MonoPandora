@@ -1,4 +1,8 @@
+import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IVerrifyConfirmForm } from '../types';
 
-export type VerifyConfirmDTO = {
-  authConfirmToken: number;
+export class VerifyConfirmDTO implements IVerrifyConfirmForm {
+  @IsNotEmpty()
+  @IsNumber()
+  authConfirmToken!: number;
 };
