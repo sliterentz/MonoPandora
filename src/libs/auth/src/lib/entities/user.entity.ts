@@ -1,10 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-// import BaseEntity from './base.entity';
+import { BaseEntity, Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Unique, OneToMany } from 'typeorm';
+import { RefreshTokenEntity as RefreshToken } from './refresh-token.entity';
 
 @Entity({ name: 'users', schema: 'public', synchronize: true })
-export class UserEntity {
+// @Unique(["email"])
+export class UserEntity extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
-  id!: number;
+  id!: string;
 
   @Column({ nullable: false })
   fullname!: string;
@@ -13,7 +14,7 @@ export class UserEntity {
   email!: string;
 
   @Column({ nullable: false })
-  password!: string
+  password!: string;
 
   @Column()
   grant!: number;
@@ -38,4 +39,7 @@ export class UserEntity {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updatedAt!: Date;
+
+  @OneToMany((type) => RefreshToken, (refreshToken) => refreshToken.user)
+  refreshTokens!: RefreshToken[];
 }

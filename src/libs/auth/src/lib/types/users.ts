@@ -29,3 +29,12 @@ export interface IRegisterUserForm {
     authConfirmToken: number;
     isVerrified: number;
 }
+
+export interface IVerrifyConfirmForm {
+    authConfirmToken: number;
+}
+
+export interface ILoginForm {
+    email: string;
+    password: string;
+}
