@@ -27,8 +27,8 @@ export class AuthController {
 
   @UseInterceptors(ResponseInterceptor)
   @Post('/signin')
-  async signin(@Body() user: User) {
-    return await this.authService.signin(user);
+  async signin(@Body() user: User, @Res() res: FastifyReply) {
+    return await this.authService.signin(user, res);
   }
 
   @UseInterceptors(ResponseInterceptor)

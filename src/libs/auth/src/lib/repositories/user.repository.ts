@@ -62,7 +62,7 @@ export class UserRepository extends BaseRepository {
 
         const salt = await bcrypt.genSalt();
         const hash = await bcrypt.hash(req.password, salt);
-        const confirmToken =  Math.floor(10000 + Math.random() * 90000);
+        const confirmToken = Math.floor(100000 + Math.random() * 900000);
 
         const payload = {
             fullname: req.fullname,

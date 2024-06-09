@@ -158,11 +158,17 @@ export class AuthService {
     }
   }
 
-  async signin(user: User): Promise<any> {
+  async signin(user: User, result: FastifyReply): Promise<any> {
       // Profile
       this.logger.startProfile('signin');
     try {
       const validateLogin = await this.userService.signin(user);
+
+      let response = {
+        message: 'Successfull login',
+        code: 200,
+        data: []
+      };
 
       if (!validateLogin) {
         // Fatal
@@ -172,10 +178,23 @@ export class AuthService {
           },
           error: new Error('Unauthorize request'),
         });
-        return new HttpException('Incorrect username or password', HttpStatus.UNAUTHORIZED)
+        response = {
+          message: 'User allready activated',
+          code: 400,
+          data: []
+        };
+  
+        return result.code(400).type('application/json').send(response);
+        // return new HttpException('Incorrect username or password', HttpStatus.UNAUTHORIZED)
       } 
     
-      return validateLogin;
+      response = {
+        message: 'Successfull login',
+        code: 200,
+        data: validateLogin
+      };
+
+      return result.code(200).type('application/json').send(response);
     } catch (error) {
       // Error
       this.logger.error('Incorrect username or password', {
@@ -184,8 +203,17 @@ export class AuthService {
         },
         error: new Error('Unauthorize request'),
       });
+
+      let response = {
+        message: 'Internal error exception',
+        code: 500,
+        data: false
+      };
+
+      return result.code(500).type('application/json').send(response);
+      
       // throw new BaseError({ name: 'EXCEPTIONAL_ERROR', message: 'Internal error exception', cause: HttpStatus.INTERNAL_SERVER_ERROR });
-      return new HttpException('Internal error exception', HttpStatus.INTERNAL_SERVER_ERROR);
+      // return new HttpException('Internal error exception', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
