@@ -4,9 +4,12 @@ import { PaletteMode } from '@mui/material'
 // ** Types
 import { ContentWidth } from '../lib/types/layouts'
 
+import { ThemeLayoutValue } from '../lib/types/layouts'
+
 type ThemeConfig = {
   mode: PaletteMode
   templateName: string
+  themeLayout: ThemeLayoutValue
   routingLoader: boolean
   disableRipple: boolean
   navigationSize: number
@@ -19,6 +22,7 @@ const themeConfig: ThemeConfig = {
   // ** Layout Configs
   templateName: 'Monopando' /* App Name */,
   mode: 'dark' /* light | dark */,
+  themeLayout: 'vertical'  /* vertical | horizontal | mini */,
   contentWidth: 'full' /* full | boxed */,
 
   // ** Routing Configs

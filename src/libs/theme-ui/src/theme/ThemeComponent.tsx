@@ -31,7 +31,6 @@ const ThemeComponent = (props: Props) => {
   // ** Props
   const { settings, children } = props
 
-  console.log(settings);
   // ** Merged ThemeOptions of Core and User
   const coreThemeConfig = themeOptions(settings)
 

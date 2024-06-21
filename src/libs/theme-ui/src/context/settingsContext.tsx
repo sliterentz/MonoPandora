@@ -1,5 +1,5 @@
 // ** React Imports
-import { createContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 
 // ** MUI Imports
 import { PaletteMode } from '@mui/material'
@@ -8,11 +8,12 @@ import { PaletteMode } from '@mui/material'
 import themeConfig from '../configs/themeConfig'
 
 // ** Types Import
-import { ThemeColor, ContentWidth } from '../lib/types/layouts'
+import { ThemeColor,ThemeLayoutValue, ContentWidth } from '../lib/types/layouts'
 
 export type Settings = {
   mode: PaletteMode
   themeColor: ThemeColor
+  themeLayout: ThemeLayoutValue
   contentWidth: ContentWidth
 }
 
@@ -24,6 +25,7 @@ export type SettingsContextValue = {
 const initialSettings: Settings = {
   themeColor: 'primary',
   mode: themeConfig.mode,
+  themeLayout: themeConfig.themeLayout,
   contentWidth: themeConfig.contentWidth
 }
 
@@ -32,6 +34,14 @@ export const SettingsContext = createContext<SettingsContextValue>({
   saveSettings: () => null,
   settings: initialSettings
 })
+
+export const useSettingsContext = () => {
+  const context = useContext(SettingsContext);
+
+  if (!context) throw new Error('useSettingsContext must be use inside SettingsProvider');
+
+  return context;
+};
 
 export const SettingsProvider = ({ children }: { children: ReactNode }) => {
   // ** State

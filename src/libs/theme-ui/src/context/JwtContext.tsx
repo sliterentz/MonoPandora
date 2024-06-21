@@ -19,6 +19,7 @@ enum Types {
   LOGIN = 'LOGIN',
   REGISTER = 'REGISTER',
   VERIFY = 'VERIFY',
+  PROFILE = 'PROFILE',
   LOGOUT = 'LOGOUT',
 }
 
@@ -31,6 +32,10 @@ type Payload = {
     user: AuthUserType;
   };
   [Types.REGISTER]: {
+    user: AuthUserType;
+  };
+  [Types.PROFILE]: {
+    isAuthenticated: boolean;
     user: AuthUserType;
   };
   [Types.VERIFY]: undefined;
@@ -76,6 +81,13 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
       user: null,
     };
   }
+  if (action.type === Types.PROFILE) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      user: action.payload.user,
+    };
+  }
   if (action.type === Types.LOGOUT) {
     return {
       ...state,
@@ -105,7 +117,7 @@ export const setToken = (val) => {
 // ----------------------------------------------------------------------
 
 type AuthProviderProps = {
-  children: ReactNode;
+  children: React.ReactNode;
 };
 
 export function AuthProvider({ children }: AuthProviderProps) {
@@ -120,7 +132,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (accessToken) {
         setSession(accessToken);
 
-        // const response = await axios.get('/api/account/my-account');
+        // const response = await axios.get('/api/v1/auth/profile');
 
         // const { user } = response.data;
 
@@ -163,9 +175,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       password,
     })
 
-    const { accessToken, user } = response.data;
+    if (response) {
+    const { accessToken, user } = response.data.data;
 
     setSession(accessToken);
+
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('user', JSON.stringify(user[0]));
 
     dispatch({
       type: Types.LOGIN,
@@ -173,6 +189,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user,
       },
     });
+  }
   }, []);
 
   // REGISTER
@@ -225,6 +242,69 @@ export function AuthProvider({ children }: AuthProviderProps) {
     []
   );
 
+  // PROFILE
+  const profile = useCallback(
+    async (token: string) => {
+      try {
+
+        localStorage.setItem('accessToken', token);
+        axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+      
+      //   const headers = {
+      //   'Authorization': 'Bearer '+token,
+      // };
+
+      const response = await axios.get('/api/v1/auth/profile');
+
+      const { user } = response.data;
+
+      localStorage.setItem('user', user);
+
+      dispatch({
+        type: Types.PROFILE,
+        payload: {
+          isAuthenticated: true,
+          user,
+        },
+      });
+    } catch(err) {
+      console.log(err)
+    }
+    },
+    []
+  )
+
+  // CREATE USER
+  const createUser = useCallback(
+      async (username: string, password: string, email: string, fullname: string, phone: string, grant: number, isVerrified: boolean) => {
+        try {
+        const response = await axios.post('/api/v1/user/add', {
+          username,
+          password,
+          email,
+          fullname,
+          phone,
+          grant,
+          isVerrified
+        });
+
+        const { accessToken, user } = response.data;
+  
+        // localStorage.setItem('accessToken', accessToken);
+  
+        // dispatch({
+        //   type: Types.REGISTER,
+        //   payload: {
+        //     user,
+        //   },
+        // });
+      } catch(err) {
+        console.log(err)
+      }
+      },
+      []
+  );
+
   // LOGOUT
   const logout = useCallback(() => {
     setSession(null);
@@ -245,9 +325,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       loginWithTwitter: () => {},
       register,
       verify,
+      profile,
+      createUser,
       logout,
     }),
-    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify]
+    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify, profile]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
