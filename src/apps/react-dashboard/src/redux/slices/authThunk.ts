@@ -1,24 +1,74 @@
-import { createAsyncThunk, createSlice, Dispatch } from '@reduxjs/toolkit';
+import { createSlice, Dispatch } from '@reduxjs/toolkit';
+
+import { IUserAuth } from '@theme-ui';
 
 // utils
-import {axios} from '@theme-ui';
+import { axios } from '@theme-ui';
 
-// const initialState: IUserData = {
-//   fullname: string,
-//   email: string,
-//   password: string,
-//   grant: number,
-//   isVerrified: number,
-// };
+const userToken = localStorage.getItem('accessToken')
+  ? localStorage.getItem('accessToken')
+  : null;
 
-export const fetchUserData = createAsyncThunk('auth/fetchUserData', async (_, {rejectWithValue}) => {
-  try {
-    const accessToken = getToken();
-    api.defaults.headers.Authorization = `Bearer ${accessToken}`;
-    const response = await axios.get('/api/products');
-    return {...response.data, accessToken};
-  } catch(e) {
-    removeToken();
-    return rejectWithValue('');
-  }
+const initialState: IUserAuth = {
+  isLoading: false,
+  userInfo: [],
+  userToken,
+  error: [],
+  success: false,
+};
+
+const slice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    logout(state) {
+      localStorage.removeItem('accessToken') // deletes token from storage
+      state.isLoading = false
+      state.userInfo = []
+      state.userToken = null
+      state.error = []
+    },
+
+    // START LOADING
+    startLoading(state) {
+      state.isLoading = true;
+    },
+
+    // HAS ERROR
+    hasError(state, action) {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
+
+     // GET PROFILE DATA
+    getProfileSuccess(state, action) {
+      state.isLoading = false;
+      state.userInfo = action.payload;
+    },
+  },
 });
+
+// Reducer
+export default slice.reducer;
+
+// Actions
+export const {
+  getProfileSuccess,
+} = slice.actions;
+
+export function fetchUserData() {
+  return async (dispatch: Dispatch) => {
+    dispatch(slice.actions.startLoading());
+    try {
+      const accessToken = userToken;
+      const headers = {
+        'Authorization': 'Bearer '+ accessToken,
+      }
+      const response = await axios.get('/api/v1/auth/profile', { headers });
+      
+      dispatch(slice.actions.getProfileSuccess(response.data));
+    } catch (error) {
+      dispatch(slice.actions.hasError(error));
+    }
+  };
+}

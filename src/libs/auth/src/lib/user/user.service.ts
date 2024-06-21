@@ -35,43 +35,33 @@ export class UserService {
     return await this.refreshTokenRepository.createToken(code);
   }
 
-// async updateUser(accessToken: string, userUpdateData: Partial<User>): Promise<UpdateResult> {
-//   try {
-//     const hasValidAccess = await this.jwtService.verifyAsync(accessToken, {
-//       secret: 'kopitubrukhitam',
-//     });
+  async checkRefreshToken(userId: string): Promise<any> {
+    return await this.refreshTokenRepository.checkTokenExpiredbyUserId(userId);
+  }
 
-//     if(!hasValidAccess) {
-//       throw new UnauthorizedException('Invalid credentials');
-//     }
-
-//     const userId = userUpdateData['id'];
-
-//     return this.userRepository.update(userId, userUpdateData);
-//   } catch(e) {
-//     throw new UnauthorizedException(e);
-//   }
-// }
-
-async findByEmail(email: string): Promise<User | null> {
+  async refreshUserToken(userId: string): Promise<any> {
+    return await this.refreshTokenRepository.reCreateToken(userId);
+  }
+  
+  async findByEmail(email: string): Promise<User | null> {
     return await this.usersRepository.findByEmail(email);
-}
-
-async findById(id: string): Promise<User | null> {
-  return await this.usersRepository.findById(id);
-}
-
-async findAll(): Promise<User[]> {
+  }
+  
+  async findById(id: string): Promise<User | null> {
+    return await this.usersRepository.findById(id);
+  }
+  
+  async findAll(): Promise<User[]> {
     return await this.userRepository.find();
-}
-
-async findByEmailWithPassword(email: string | undefined): Promise<User | null> {
+  }
+  
+  async findByEmailWithPassword(email: string | undefined): Promise<User | null> {
     return await this.userRepository.findOne({
         where: {
             email,
         },
     });
-}
+  }
 
   async findByConfirmToken(authConfirmToken: number): Promise<User | null> {
     return await this.userRepository.findOne({

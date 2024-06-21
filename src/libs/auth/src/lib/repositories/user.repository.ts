@@ -135,13 +135,28 @@ export class UserRepository extends BaseRepository {
         }
         
         const payload = { id: foundUser.id, email: user.email };
-        const generatedToken = await this.jwtService.sign(payload, {
-          secret: process.env['JWT_SECRET'], expiresIn: process.env['JWT_EXPIRES_IN'],
+        const generatedAccessToken =  await this.jwtService.sign(payload, {
+          secret: process.env['JWT_SECRET'], expiresIn: process.env['ACCESS_JWT_EXPIRES_IN'],
         });
+
+        // const isExpired = await this.userService.checkRefreshToken(foundUser.id);
+
+        // if (isExpired) {
+        //   const generatedRefreshToken = await this.jwtService.sign(payload, {
+        //     secret: process.env['JWT_SECRET'], expiresIn: process.env['REFRESH_JWT_EXPIRES_IN'],
+        //   });
+
+        //   await this.userService.refreshUserToken(foundUser.id);
+        // }
         
         return {
-          // user: foundUser,
-          accessToken: generatedToken,
+          user: [{
+            'displayName': foundUser.fullname,
+            'email': foundUser.email,
+            'role': foundUser.grant,
+            'isVerrified': foundUser.isVerrified,
+        }],
+          accessToken: generatedAccessToken,
         };
 
       } catch(error) {

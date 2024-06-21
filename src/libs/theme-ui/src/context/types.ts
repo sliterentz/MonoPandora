@@ -1,6 +1,4 @@
-// ----------------------------------------------------------------------
-
-export type ActionMapType<M extends { [index: string]: any }> = {
+  export type ActionMapType<M extends { [index: string]: any }> = {
     [Key in keyof M]: M[Key] extends undefined
       ? {
         type: Key;
@@ -29,6 +27,8 @@ export type ActionMapType<M extends { [index: string]: any }> = {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string, fullname: string, grant: number, isVerrified: boolean) => Promise<void>;
     verify: (code1: string, code2: string, code3: string, code4: string, code5: string, code6: string) => Promise<void>;
+    createUser: (username: string, email: string, password: string, fullname: string, phone: string, grant: number, company: number, isVerrified: boolean) => Promise<void>;
+    profile: (token: string) => Promise<void>;
     logout: () => void;
     loginWithGoogle?: () => void;
     loginWithGithub?: () => void;
@@ -81,4 +81,3 @@ export type ActionMapType<M extends { [index: string]: any }> = {
     loginWithGithub?: () => void;
     loginWithTwitter?: () => void;
   };
-  
