@@ -104,7 +104,7 @@ const App = ({ Component, emotionCache = clientSideEmotionCache, pageProps }: Ex
               // )
               // {
               //   return <ThemeProvider settings={settings}>{getLayout(<Component {...pageProps} />)}</ThemeProvider>
-              // } 
+              // }
               (<ThemeProvider settings={settings}>
                     {/* <Router> */}
                       <AppRoutes {...pageProps}/>

@@ -21,6 +21,7 @@ import {
   fullAddress,
   phoneNumber,
   position,
+  salary,
   gender,
 } from './assets';
 
@@ -41,6 +42,7 @@ const _mock = {
   gender: (index: number) => gender[index],
   joinDate: (index: number) => subDays(new Date(), index),
   company: (index: number) => company[index],
+  salary: (index: number) => salary[index],
   address: {
     fullAddress: (index: number) => fullAddress[index],
     country: (index: number) => country[index],

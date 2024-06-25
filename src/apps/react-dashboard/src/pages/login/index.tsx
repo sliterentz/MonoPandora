@@ -33,6 +33,10 @@ import Facebook from 'mdi-material-ui/Facebook'
 import EyeOutline from 'mdi-material-ui/EyeOutline'
 import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
 
+// redux
+import { useDispatch } from '../../redux/store';
+import { fetchUserData } from '../../redux/slices/authThunk';
+
 // ** Configs
 import { themeConfig } from '@theme-ui'
 
@@ -80,6 +84,8 @@ type FormValuesProps = {
 const LoginPage = () => {
   const { login } = useAuthContext();
 
+  const dispatch = useDispatch();
+  
   // ** State
   const [values, setValues] = useState<State>({
     password: '',
@@ -141,9 +147,10 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (isSubmitSuccessful) {
+      dispatch(fetchUserData());
       navigate('/dashboard');
     }
-  }, [isSubmitSuccessful, navigate]);
+  }, [isSubmitSuccessful, dispatch, navigate]);
 
   return (
     <BlankLayout>
@@ -311,6 +318,6 @@ const LoginPage = () => {
   )
 }
 
-LoginPage.getLayout = (page: React.ReactNode) => <BlankLayout>{page}</BlankLayout>
+LoginPage.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
 
 export default LoginPage

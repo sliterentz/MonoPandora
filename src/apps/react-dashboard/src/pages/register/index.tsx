@@ -1,12 +1,13 @@
 import * as Yup from 'yup';
 
 // ** React Imports
-import { useState, Fragment, ChangeEvent, MouseEvent, ReactNode } from 'react'
+import { useState, Fragment, ChangeEvent, MouseEvent, ReactNode, useEffect } from 'react'
 
 // ** Next Imports
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 // ** MUI Components
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
@@ -22,6 +23,7 @@ import { styled, useTheme } from '@mui/material/styles'
 import MuiCard, { CardProps } from '@mui/material/Card'
 import InputAdornment from '@mui/material/InputAdornment'
 import MuiFormControlLabel, { FormControlLabelProps } from '@mui/material/FormControlLabel'
+import { LoadingButton } from '@mui/lab';
 
 // ** Icons Imports
 import Google from 'mdi-material-ui/Google'
@@ -30,6 +32,9 @@ import Twitter from 'mdi-material-ui/Twitter'
 import Facebook from 'mdi-material-ui/Facebook'
 import EyeOutline from 'mdi-material-ui/EyeOutline'
 import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
+
+// redux
+import { useDispatch } from '../../redux/store';
 
 // ** Configs
 import { themeConfig } from '@theme-ui'
@@ -79,6 +84,10 @@ type FormValuesProps = {
 };
 
 const RegisterPage = () => {
+  const { register } = useAuthContext()
+
+  const dispatch = useDispatch();
+
   // ** States
   const [values, setValues] = useState<State>({
     password: '',
@@ -86,7 +95,8 @@ const RegisterPage = () => {
   })
 
   // ** Hook
-  const theme = useTheme();
+  const theme = useTheme()
+  const navigate = useNavigate()
 
   const handleChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
     setValues({ ...values, [prop]: event.target.value })
@@ -98,8 +108,6 @@ const RegisterPage = () => {
     event.preventDefault()
   }
 
-  const { register } = useAuthContext();
-  
   const [showPassword, setShowPassword] = useState(false);
 
   const RegisterSchema = Yup.object().shape({
@@ -128,9 +136,9 @@ const RegisterPage = () => {
 
   const onSubmit = async (data: FormValuesProps) => {
     try {
-      if (register) {
-        await register(data.email, data.password, data.fullname, 1, false);
-      }
+      // if (register) {
+        await register(data.email, data.password, data.fullname, 3, false, 1);
+      // }
     } catch (error) {
       console.error(error);
       reset();
@@ -141,7 +149,14 @@ const RegisterPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (isSubmitSuccessful) {
+      navigate('/pages/verify');
+    }
+  }, [isSubmitSuccessful, dispatch, navigate]);
+
   return (
+    <BlankLayout>
     <Box className='content-center'>
       <Card sx={{ zIndex: 1 }}>
         <CardContent sx={{ padding: theme => `${theme.spacing(12, 9, 7)} !important` }}>
@@ -222,10 +237,12 @@ const RegisterPage = () => {
             <Typography variant='h5' sx={{ fontWeight: 600, marginBottom: 1.5 }}>
               Adventure starts here 🚀
             </Typography>
-            <Typography variant='body2'>Make your app management easy and fun!</Typography>
+            <Typography variant='body2'>Make your project management easy and fun!</Typography>
           </Box>
           <Divider sx={{ margin: 0 }} />
           <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+            {!!errors.afterSubmit && <Alert severity="error">{errors.afterSubmit.message}</Alert>}
+
           <RHFTextField name="fullname" label="Full name" sx={{ marginBottom: 4 }} />
           <RHFTextField name="email" label="Email address" sx={{ marginBottom: 4 }} />
           {/* <form noValidate autoComplete='off' onSubmit={e => e.preventDefault()}> */}
@@ -283,9 +300,17 @@ const RegisterPage = () => {
                 </Fragment>
               }
             />
-            <Button fullWidth size='large' type='submit' variant='contained' sx={{ marginBottom: 7 }}>
-              Sign up
-            </Button>
+            <LoadingButton
+              fullWidth
+              size='large'
+              type='submit'
+              variant='contained'
+              loading={isSubmitSuccessful || isSubmitting}
+              sx={{ marginBottom: 7 }}
+              // onClick={() => navigate('/')}
+            >
+              Sing Up
+            </LoadingButton>
             <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
               <Typography variant='body2' sx={{ marginRight: 2 }}>
                 Already have an account?
@@ -325,6 +350,7 @@ const RegisterPage = () => {
       </Card>
       <FooterIllustrationsV1 />
     </Box>
+  </BlankLayout>
   )
 }
 

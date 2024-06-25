@@ -15,6 +15,7 @@ import { ApexChartWrapper } from '@theme-ui'
 import { UserLayout } from '@theme-ui'
 
 const HomePage = () => {
+
   return (
     <UserLayout>
     <ApexChartWrapper>

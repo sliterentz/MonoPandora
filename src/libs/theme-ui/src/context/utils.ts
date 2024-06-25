@@ -1,9 +1,23 @@
+// import { UnauthorizedException } from '@nestjs/common';
 // routes
 import { PATH_AUTH } from '../routes/paths';
 // utils
 import axios from '../lib/utils/axios';
 
-// ----------------------------------------------------------------------
+
+async function jwtExpDecode(token: string) {
+  try {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+
+    const response = await axios.get('/api/v1/auth/users');
+    const { exp } = response.data;
+  
+    return exp;
+  } catch(error) {
+    // throw new UnauthorizedException('Invalid credential');
+  }
+}
+
 
 function jwtDecode(token: string) {
   const base64Url = token.split('.')[1];
@@ -66,7 +80,15 @@ export const setSession = (accessToken: string | null) => {
 
     // This function below will handle when token is expired
     // const { exp } = jwtDecode(accessToken); // ~3 days by minimals server
-    // tokenExpired(exp);
+    
+    // const headers = {
+    //   'Authorization': 'Bearer '+ accessToken,
+    // }
+
+    // jwtExpDecode(accessToken).then((exp) => {
+      // tokenExpired(exp);
+    // });
+    
   } else {
     localStorage.removeItem('accessToken');
 

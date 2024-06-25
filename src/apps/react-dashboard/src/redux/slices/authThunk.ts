@@ -1,6 +1,6 @@
 import { createSlice, Dispatch } from '@reduxjs/toolkit';
 
-import { IUserAuth } from '@theme-ui';
+import { IUserAuth, PATH_AUTH } from '@theme-ui';
 
 // utils
 import { axios } from '@theme-ui';
@@ -68,6 +68,10 @@ export function fetchUserData() {
       
       dispatch(slice.actions.getProfileSuccess(response.data));
     } catch (error) {
+
+      // localStorage.removeItem('accessToken');
+      // window.location.href = PATH_AUTH.login;
+
       dispatch(slice.actions.hasError(error));
     }
   };

@@ -5,6 +5,8 @@ export type ContentWidth = 'full' | 'boxed'
 
 export type ThemeColor = 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success'
 
+export type ThemeLayoutValue = 'vertical' | 'horizontal' | 'mini';
+
 export type NavLink = {
   path?: string
   title: string

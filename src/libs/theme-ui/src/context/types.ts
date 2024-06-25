@@ -1,3 +1,5 @@
+import { IUserAccountGeneral } from "../lib/types";
+
   export type ActionMapType<M extends { [index: string]: any }> = {
     [Key in keyof M]: M[Key] extends undefined
       ? {
@@ -25,9 +27,9 @@
     isInitialized: boolean;
     user: AuthUserType;
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, fullname: string, grant: number, isVerrified: boolean) => Promise<void>;
+    register: (email: string, password: string, fullname: string, grant: number, isVerified: boolean, status: number) => Promise<void>;
     verify: (code1: string, code2: string, code3: string, code4: string, code5: string, code6: string) => Promise<void>;
-    createUser: (username: string, email: string, password: string, fullname: string, phone: string, grant: number, company: number, isVerrified: boolean) => Promise<void>;
+    createUser: (username: string, email: string, phone: string, password: string, fullname: string, grant: number, isVerified: boolean, company: string, avatarUrl: string, status: number) => Promise<IUserAccountGeneral>;
     profile: (token: string) => Promise<void>;
     logout: () => void;
     loginWithGoogle?: () => void;

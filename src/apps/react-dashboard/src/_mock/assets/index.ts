@@ -2,6 +2,7 @@ export * from './name';
 export * from './role';
 export * from './roleName';
 export * from './position';
+export * from './salary';
 export * from './text';
 export * from './email';
 export * from './number';

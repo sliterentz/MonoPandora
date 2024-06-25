@@ -29,8 +29,6 @@ const StyledRoot = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
 }));
 
-// ----------------------------------------------------------------------
-
 export default function LoadingScreen() {
   const { pathname } = useLocation();
 

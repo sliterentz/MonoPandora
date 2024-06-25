@@ -123,6 +123,7 @@ const VerifyCodePage = () => {
   };
 
   return (
+  <BlankLayout>
     <Box className='content-center'>
     <Card>
     <CardHeader title='Please check your email!' titleTypographyProps={{ variant: 'h6' }} />
@@ -166,26 +167,10 @@ const VerifyCodePage = () => {
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <Typography variant="body2" sx={{ my: 3 }}>
-        Don’t have a code? &nbsp;
-        <Link variant="subtitle2">Resend code</Link>
+        Already activate ? &nbsp;
+        <Link component={RouterLink} to={PATH_AUTH.login} variant="subtitle2">Return to sign in</Link>
       </Typography>
 
-      <Link
-        component={RouterLink}
-        to={PATH_AUTH.login}
-        color="inherit"
-        variant="subtitle2"
-        sx={{
-          mx: 'auto',
-          alignItems: 'center',
-          display: 'inline-flex',
-        }}
-      >
-        <IconButton component='a' onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}>
-                  <EyeOutline sx={{ color: '#db4437' }} />
-                  Return to sign in
-        </IconButton>
-      </Link>
       </Box>
       </FormProvider>
       </Grid>
@@ -193,6 +178,7 @@ const VerifyCodePage = () => {
       </Card>
       <FooterIllustrationsV1 />
       </Box>
+  </BlankLayout>
   );
 }
 

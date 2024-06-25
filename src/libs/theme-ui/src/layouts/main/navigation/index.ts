@@ -10,6 +10,7 @@ import Cash100 from 'mdi-material-ui/Cash100'
 
 // ** Type import
 import { VerticalNavItemsType } from '../../../lib/types/layouts'
+// import { PATH_DASHBOARD } from '../../../routes/paths'
 
 const navigation = (): VerticalNavItemsType => {
   return [
@@ -34,6 +35,12 @@ const navigation = (): VerticalNavItemsType => {
       title: 'Role',
       icon: AccountCogOutline,
       path: '/pages/role',
+      openInNewTab: true
+    },
+    { 
+      title: 'Permission', 
+      icon: AccountCogOutline,
+      path: '/pages/permission',
       openInNewTab: true
     },
     {

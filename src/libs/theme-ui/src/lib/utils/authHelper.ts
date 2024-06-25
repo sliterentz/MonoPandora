@@ -5,7 +5,7 @@ interface IProfile {
     displayName: string;
     email: string;
     role: number;
-    isVerrified: boolean;
+    isVerified: boolean;
   }
 
 export const getDisplayName = () => {
@@ -52,6 +52,6 @@ export const getVerifiedStatus = () => {
   
     if (userProfile) {
       const user: IProfile = JSON.parse(userProfile)
-      return user.isVerrified;
+      return user.isVerified;
     }
   }

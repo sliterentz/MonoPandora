@@ -9,12 +9,14 @@ export * from './components/hook-form';
 
 export { default as ApexChartWrapper } from './components/react-apexcharts';
 export { default as CardStatisticsVerticalComponent } from './components/card-statistics/card-stats-vertical';
+export { default as Iconify } from './components/iconify/Iconify';
 export { default as UserLayout } from './layouts/UserLayout';
 export { default as BlankLayout } from './layouts/BlankLayout';
 
+export { bgBlur } from './lib/utils/cssStyles';
 export { default as axios } from './lib/utils/axios';
 export { fDate, fTimestamp } from './lib/utils/formatTime';
-export { fShortenNumber } from './lib/utils/formatNumber';
+export { fShortenNumber, fData, fNumber, fCurrency } from './lib/utils/formatNumber';
 export { getDisplayName, getRoleName, getEmail, getVerifiedStatus } from './lib/utils/authHelper';
 export { default as Router } from './routes';
 
@@ -39,3 +41,4 @@ export { default as Label } from './components/label';
 export { default as MenuPopover } from './components/menu-popover';
 export { default as ConfirmDialog } from './components/confirm-dialog';
 export { CustomAvatar, CustomAvatarGroup } from './components/custom-avatar'
+export * from './components/upload';

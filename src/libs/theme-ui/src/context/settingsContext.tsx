@@ -43,7 +43,7 @@ export const useSettingsContext = () => {
   return context;
 };
 
-export const SettingsProvider = ({ children }: { children: ReactNode }) => {
+export const SettingsProvider = ({ children }: { children: React.ReactNode }) => {
   // ** State
   const [settings, setSettings] = useState<Settings>({ ...initialSettings })
 

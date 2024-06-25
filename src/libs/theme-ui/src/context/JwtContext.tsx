@@ -18,6 +18,7 @@ enum Types {
   INITIAL = 'INITIAL',
   LOGIN = 'LOGIN',
   REGISTER = 'REGISTER',
+  CREATEUSER = 'CREATEUSER',
   VERIFY = 'VERIFY',
   PROFILE = 'PROFILE',
   LOGOUT = 'LOGOUT',
@@ -32,6 +33,9 @@ type Payload = {
     user: AuthUserType;
   };
   [Types.REGISTER]: {
+    user: AuthUserType;
+  };
+  [Types.CREATEUSER]: {
     user: AuthUserType;
   };
   [Types.PROFILE]: {
@@ -68,6 +72,13 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
     };
   }
   if (action.type === Types.REGISTER) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      user: action.payload.user,
+    };
+  }
+  if (action.type === Types.CREATEUSER) {
     return {
       ...state,
       isAuthenticated: true,
@@ -132,15 +143,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (accessToken) {
         setSession(accessToken);
 
-        // const response = await axios.get('/api/v1/auth/profile');
+        localStorage.setItem('accessToken', accessToken);
+        axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
-        // const { user } = response.data;
+        const response = await axios.get('/api/v1/auth/profile');
+
+        const { user } = response.data;
 
         dispatch({
           type: Types.INITIAL,
           payload: {
             isAuthenticated: true,
-            user: null,
+            user: user,
           },
         });
       } else {
@@ -194,14 +208,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // REGISTER
   const register = useCallback(
-    async (email: string, password: string, fullname: string, grant: number, isVerrified: boolean) => {
+    async (email: string, password: string, fullname: string, grant: number, isVerified: boolean, status: number) => {
       try {
       const response = await axios.post('/api/v1/auth/signup', {
         email,
         password,
         fullname,
         grant,
-        isVerrified
+        isVerified,
+        status,
       });
       const { accessToken, user } = response.data;
 
@@ -256,17 +271,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       const response = await axios.get('/api/v1/auth/profile');
 
-      const { user } = response.data;
-
-      localStorage.setItem('user', user);
-
-      dispatch({
-        type: Types.PROFILE,
-        payload: {
+      if (response.status === 200) {
+        const { user } = response.data;
+        localStorage.setItem('user', user);
+        
+        dispatch({
+          type: Types.PROFILE,
+          payload: {
           isAuthenticated: true,
           user,
         },
       });
+    }
+    
     } catch(err) {
       console.log(err)
     }
@@ -276,28 +293,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // CREATE USER
   const createUser = useCallback(
-      async (username: string, password: string, email: string, fullname: string, phone: string, grant: number, isVerrified: boolean) => {
+      async (username: string, password: string, email: string, phone: string, fullname: string, grant: number, isVerified: boolean, company: string, avatarUrl: string, status: number) => {
         try {
-        const response = await axios.post('/api/v1/user/add', {
+        const response = await axios.post('/api/v1/auth/user/create', {
           username,
           password,
           email,
-          fullname,
           phone,
+          fullname,
           grant,
-          isVerrified
+          isVerified,
+          company,
+          avatarUrl,
+          status,
         });
 
-        const { accessToken, user } = response.data;
+        const { user } = response.data;
   
         // localStorage.setItem('accessToken', accessToken);
   
-        // dispatch({
-        //   type: Types.REGISTER,
-        //   payload: {
-        //     user,
-        //   },
-        // });
+        dispatch({
+          type: Types.CREATEUSER,
+          payload: {
+            user,
+          },
+        });
       } catch(err) {
         console.log(err)
       }
@@ -329,7 +349,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       createUser,
       logout,
     }),
-    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify, profile]
+    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify, profile, createUser]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;
