@@ -43,6 +43,7 @@ export default function RoleTableRow({
   onSelectRow,
   onDeleteRow,
 }: Props) {
+  
   const { id, roleName, status } = row;
 
   const [openConfirm, setOpenConfirm] = useState(false);

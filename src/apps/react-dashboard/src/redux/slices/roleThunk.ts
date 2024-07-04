@@ -9,6 +9,7 @@ const userToken = localStorage.getItem('accessToken')
   : null;
 
 const initialState: IRoleState = {
+  currentRole: null,
   isLoading: false,
   error: null,
   roles: [],
@@ -38,6 +39,7 @@ const slice = createSlice({
 
     // GET ROLE
     getRoleSuccess(state, action) {
+      state.currentRole = action.payload;
       state.isLoading = false;
       state.role = action.payload;
     },
@@ -62,8 +64,8 @@ return async (dispatch: Dispatch) => {
         'Authorization': 'Bearer '+ accessToken,
       }
 
-      const response = await axios.get('/api/v1/role', { params: { page: 1, take: 5 }, headers });
-      dispatch(slice.actions.getRolesSuccess(response.data.data.content))
+      const response = await axios.get('/api/v1/access/roles', { headers });
+      dispatch(slice.actions.getRolesSuccess(response.data.data.data))
     } catch(error) {
       dispatch(slice.actions.hasError(error));
     }
@@ -79,9 +81,9 @@ export function fetchRoleData(id: number) {
           'Authorization': 'Bearer '+ accessToken,
         }
 
-        const response = await axios.get('/api/v1/role/'+id, { headers });
+        const response = await axios.get('/api/v1/access/role/'+id, { headers });
 
-        dispatch(slice.actions.getRoleSuccess(response.data))
+        dispatch(slice.actions.getRoleSuccess(response.data.data))
       } catch(error) {
         dispatch(slice.actions.hasError(error));
       }

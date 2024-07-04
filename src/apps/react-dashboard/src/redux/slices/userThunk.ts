@@ -7,7 +7,7 @@ import { IUserState } from '@theme-ui';
 const userToken = localStorage.getItem('accessToken')
   ? localStorage.getItem('accessToken')
   : null;
- 
+
 const initialState: IUserState = {
   currentUser: null,
   isLoading: false,
@@ -15,6 +15,22 @@ const initialState: IUserState = {
   users: [],
   user: null,
 };
+
+// export const fetchUsersData = createAsyncThunk('users/fetchUsersData', async (dispatch: Dispatch) => {
+//   dispatch(slice.actions.startLoading());
+//     try {
+//       const accessToken = userToken;
+//       const headers = {
+//         'Authorization': 'Bearer '+ accessToken,
+//       }
+
+//       const response = await axios.get('/api/v1/auth/users', { headers });
+//       // return response.data.data.data
+//       return dispatch(slice.actions.getUsersSuccess(response.data.data.data))
+//     } catch(error) {
+//       dispatch(slice.actions.hasError(error));
+//     }
+// })
 
 const slice = createSlice({
   name: 'user',
@@ -31,7 +47,7 @@ const slice = createSlice({
       state.error = action.payload;
     },
 
-     // GET USERS
+    // GET USERS
     getUsersSuccess(state, action) {
       state.isLoading = false;
       state.users = action.payload;
@@ -43,7 +59,17 @@ const slice = createSlice({
       state.isLoading = false;
       state.user = action.payload;
     },
+
   },
+  // extraReducers: {
+  //   [fetchUsersData.pending]: (state, action) => {
+  //     state.isLoading = true;
+  //   },
+  //   [fetchUsersData.fulfilled]: (state, action) => {
+  //     state.isLoading = false;
+  //     state.users = action.payload;
+  //   },
+  // }
 });
 
 // Reducer
@@ -56,20 +82,21 @@ export default slice.reducer;
 // } = slice.actions;
 
 export function fetchUsersData() {
-return async (dispatch: Dispatch) => {
-  dispatch(slice.actions.startLoading());
-    try {
-      const accessToken = userToken;
-      const headers = {
-        'Authorization': 'Bearer '+ accessToken,
-      }
+  return async (dispatch: Dispatch) => {
+    dispatch(slice.actions.startLoading());
+      try {
+        const accessToken = userToken;
+        const headers = {
+          'Authorization': 'Bearer '+ accessToken,
+        }
 
-      const response = await axios.get('/api/v1/auth/users', { headers });
-      dispatch(slice.actions.getUsersSuccess(response.data.data.data))
-    } catch(error) {
-      dispatch(slice.actions.hasError(error));
-    }
-  };
+        const response = await axios.get('/api/v1/auth/users', { headers });
+
+        dispatch(slice.actions.getUsersSuccess(response.data.data.data))
+      } catch(error) {
+        dispatch(slice.actions.hasError(error));
+      }
+    };
 }
 
 export function fetchUserData(id: string) {
@@ -83,9 +110,9 @@ export function fetchUserData(id: string) {
 
         const response = await axios.get('/api/v1/auth/user/'+id, { headers });
 
-        dispatch(slice.actions.getUserSuccess(response.data))
+        dispatch(slice.actions.getUserSuccess(response.data.data))
       } catch(error) {
         dispatch(slice.actions.hasError(error));
       }
     };
-  }
+}

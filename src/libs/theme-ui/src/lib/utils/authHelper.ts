@@ -2,11 +2,15 @@
 import localStorageAvailable from './localStorageAvailable';
 
 interface IProfile {
-    displayName: string;
-    email: string;
-    role: number;
-    isVerified: boolean;
-  }
+  fullname: string;
+  email: string;
+  role: number;
+  isVerified: boolean;
+}
+
+interface IRole {
+  roleName: string
+}
 
 export const getDisplayName = () => {
     const storageAvailable = localStorageAvailable();
@@ -14,25 +18,17 @@ export const getDisplayName = () => {
   
     if (userProfile) {
       const user: IProfile = JSON.parse(userProfile)
-      return user.displayName;
+      return user.fullname;
     }
   }
   
 export const getRoleName = () => {
     const storageAvailable = localStorageAvailable();
-    const userProfile = storageAvailable ? localStorage.getItem('user') : '';
+    const roleUser = storageAvailable ? localStorage.getItem('role') : '';
   
-    if (userProfile) {
-      const user: IProfile = JSON.parse(userProfile)
-      if (user.role === 0) {
-        return 'Admin';
-      } else if (user.role === 1) {
-        return 'Supervisor';
-      } else if (user.role === 2) {
-        return 'Employee';
-      } else {
-        return 'Client';
-      }
+    if (roleUser) {
+      const role: string = roleUser
+      return role;
     }
   }
   

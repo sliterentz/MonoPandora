@@ -2,7 +2,6 @@ import { useState } from 'react';
 // @mui
 import {
   Stack,
-  Avatar,
   Button,
   Checkbox,
   TableRow,
@@ -12,7 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 // @types
-import { IRoleGeneral } from '@theme-ui';
+import { IPermissionGeneral } from '@theme-ui';
 
 // components
 import { Label } from '@theme-ui';
@@ -20,8 +19,6 @@ import { Label } from '@theme-ui';
 import { MenuPopover } from '@theme-ui';
 import { ConfirmDialog } from '@theme-ui';
 
-import CheckCircleOutline from 'mdi-material-ui/CheckCircleOutline'
-import ClockOutline from 'mdi-material-ui/ClockOutline'
 import DotsVertical from 'mdi-material-ui/DotsVertical'
 import DeleteOutline from 'mdi-material-ui/DeleteOutline'
 import Pencil from 'mdi-material-ui/Pencil'
@@ -29,7 +26,7 @@ import Pencil from 'mdi-material-ui/Pencil'
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IRoleGeneral;
+  row: IPermissionGeneral;
   selected: boolean;
   onEditRow: VoidFunction;
   onSelectRow: VoidFunction;
@@ -43,7 +40,7 @@ export default function PermissionTableRow({
   onSelectRow,
   onDeleteRow,
 }: Props) {
-  const { id, roleName, status } = row;
+  const { id, permissionName, status } = row;
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
@@ -76,10 +73,8 @@ export default function PermissionTableRow({
 
         <TableCell>
           <Stack direction="row" alignItems="center" spacing={2}>
-            {/* <Avatar alt={roleName} src={avatarUrl} /> */}
-
             <Typography variant="subtitle2" noWrap>
-              {roleName}
+              {permissionName}
             </Typography>
           </Stack>
         </TableCell>

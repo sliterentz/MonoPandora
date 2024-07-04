@@ -1,7 +1,8 @@
 import * as Yup from 'yup';
+import { useParams } from 'react-router-dom';
 
 // ** React Imports
-import { ChangeEvent, forwardRef, MouseEvent, useState, useCallback, useEffect, useMemo } from 'react'
+import { MouseEvent, useState, useEffect, useMemo } from 'react'
 
 // ** Next Imports
 import { useNavigate } from 'react-router-dom'
@@ -16,8 +17,6 @@ import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
 import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem'
-import TextField from '@mui/material/TextField'
-import FormControlLabel from '@mui/material/FormControlLabel';
 import CardHeader from '@mui/material/CardHeader'
 import InputLabel from '@mui/material/InputLabel'
 import IconButton from '@mui/material/IconButton'
@@ -25,68 +24,101 @@ import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import InputAdornment from '@mui/material/InputAdornment'
-import Switch from '@mui/material/Switch';
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-
-// ** Icons Imports
-import EyeOutline from 'mdi-material-ui/EyeOutline'
-import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
-
-// ** Styled Component
-import { UserLayout, fData } from '@theme-ui'
-import { Label } from '@theme-ui';
+import Select from '@mui/material/Select'
+import Tooltip from '@mui/material/Tooltip'
+import TableContainer from '@mui/material/TableContainer'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
 
 // redux
-import { useDispatch } from '../../redux/store';
+import { useDispatch, useSelector } from '../../redux/store';
+import { fetchPermissionsData } from '../../redux/slices/permissionThunk';
 
 // ** Import Form Provider
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuthContext } from '@theme-ui';
-import { FormProvider, RHFTextField, RHFSwitch, RHFUploadAvatar } from '@theme-ui';
-import { IRoleGeneral } from '@theme-ui'
-import { CustomFile } from '@theme-ui';
+import { FormProvider, RHFTextField } from '@theme-ui';
+import { IRoleGeneral, PATH_DASHBOARD } from '@theme-ui'
 import { status } from 'nprogress';
 
-interface State {
-  password: string
-  password2: string
-  showPassword: boolean
-  showPassword2: boolean
-}
+import { useTable, TablePaginationCustom, TableSelectedAction, TableHeadCustom, TableEmptyRows, TableNoData, getComparator, emptyRows } from '@theme-ui'
+
+import PermissionTableRow from '../../sections/role/PermissionTableRow'
+import PermissionTableToolbar from './PermissionTableToolbar';
 
 interface FormValuesProps {
-    fullName: string;
+    roleName: string;
+    permissionIds: number[];
+    permissions: number[];
     status: number;
     afterSubmit?: string;
   };
 
   type Props = {
     isEdit?: boolean;
-    currentUser?: IRoleGeneral;
+    currentRole?: IRoleGeneral;
   };
 
-const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
+  import { IPermissionGeneral } from '@theme-ui'
 
-  const { createUser } = useAuthContext();
+  const TABLE_HEAD = [
+    { id: 'id', label: 'ID', align: 'left' },
+    { id: 'permissionName', label: 'Name', align: 'left' },
+    { id: 'description', label: 'Description', align: 'left' },
+    { id: 'status', label: 'Status', align: 'left' },
+  ];
+
+const RoleAddEditForm = ({ isEdit = false, currentRole }: Props) => {
+  const { id } = useParams();
+
+  const {
+    dense,
+    page,
+    order,
+    orderBy,
+    rowsPerPage,
+    setPage,
+    //
+    selected,
+    setSelected,
+    onSelectRow,
+    onSelectAllRows,
+    //
+    onSort,
+    onChangeDense,
+    onChangePage,
+    onChangeRowsPerPage,
+  } = useTable();
+
+  const { createRole, updateRole } = useAuthContext();
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
+  const [filterName, setFilterName] = useState('');
+  const [filterStatus, setFilterStatus] = useState(10);
+
+  const [tableData, setTableData] = useState<IPermissionGeneral[]>([]);
+
+  const { permissions, isLoading } = useSelector((state) => state.permission);
+
   const defaultValues = useMemo(
   () => ({
-    roleName: currentUser?.roleName || '',
-    status: currentUser?.status || 1,
+    roleName: currentRole?.roleName || '',
+    permissionIds: currentRole?.permissionIds || [],
+    permissions: currentRole?.permissionIds || [],
+    status: currentRole?.status || 1,
     afterSubmit: '',
   }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentUser]
+    [currentRole]
   );
 
   const AddUserSchema = Yup.object().shape({
-    roleName: Yup.string().required('Username required'),
+    roleName: Yup.string().required('Rolename required'),
+    permissionIds: Yup.array().required('Permission is required'),
+    permissions: Yup.array().required('Permission is required'),
     status: Yup.number().required('Status is Required'),
   });
 
@@ -108,7 +140,15 @@ const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && currentUser) {
+    dispatch(fetchPermissionsData());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isEdit && currentRole) {
+      // const tempIds = permissions.map(permission => permission.id);
+      // console.log(selected);
+      // setPermissionIds(selected);
+      setSelected(values.permissionIds);
       reset(defaultValues);
     }
     if (!isEdit) {
@@ -117,8 +157,11 @@ const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     if (isSubmitSuccessful) {
       navigate('/pages/role');
     }
+    if (permissions.length) {
+      setTableData(permissions);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, currentUser,isSubmitSuccessful, dispatch, navigate]);
+  }, [isEdit, currentRole, permissions, isSubmitSuccessful, navigate]);
 
   const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
@@ -130,14 +173,26 @@ const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
 
   const onSubmit = async (data: FormValuesProps) => {
     try {
-      const isSuccess = await createUser(data.username, data.password, data.email, data.phone, data.fullname, data.grant, data.isVerified, data.company, data.avatarUrl, data.status);
+      let isSuccess = null;
+      if(!isEdit) {
+        isSuccess = await createRole(data.roleName, selected, data.status);
 
       if (!isSuccess) {
         setError('afterSubmit', {
           message: 'Failed Add Role',
         });
       }
-        
+    }
+    
+    isSuccess = await updateRole(id, data.roleName, selected, data.status);
+
+    if (!isSuccess) {
+      setError('afterSubmit', {
+        message: 'Failed Edit Role',
+      });
+    }
+
+    navigate(PATH_DASHBOARD.role.root)
       // console.log('DATA', data);
     } catch (error) {
       console.error(error);
@@ -148,6 +203,33 @@ const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
       });
     }
   };
+
+  const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPage(0);
+    setFilterName(event.target.value);
+  };
+
+  const handleResetFilter = () => {
+    setFilterName('');
+    setFilterStatus(10);
+  };
+
+  const dataFiltered = applyFilter({
+    inputData: tableData,
+    comparator: getComparator(order, orderBy),
+    filterName,
+    filterStatus,
+  });
+
+  const dataInPage = dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+  const denseHeight = dense ? 52 : 72;
+
+  const isFiltered = filterName !== '' || filterStatus !== 10;
+
+  const isNotFound =
+  (!dataFiltered.length && !!filterName) ||
+  (!dataFiltered.length && !!filterStatus);
 
   return (
     <>
@@ -161,52 +243,6 @@ const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
 
         <CardContent>
           <Grid container spacing={5}>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ pt: 10, pb: 5, px: 3 }}>
-            {!isEdit && (
-              <Label color={(values.status === 2 && 'warning') ||
-                       (values.status === 0 && 'error') ||
-                       'success'}
-                     sx={{ textTransform: 'uppercase', position: 'absolute', top: 24, right: 24 }}
-              >
-                {values.status}
-              </Label>
-            )}
-
-            {isEdit && (
-              <FormControlLabel
-                labelPlacement="start"
-                control={
-                  <Controller
-                    name="status"
-                    control={control}
-                    render={({ field }) => (
-                      <Switch
-                        {...field}
-                        checked={field.value !== 1}
-                        onChange={(event) =>
-                          field.onChange(event.target.checked ? 'disable' : 'active')
-                        }
-                      />
-                    )}
-                  />
-                }
-                label={
-                  <>
-                    <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      Role Status
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Apply disable role
-                    </Typography>
-                  </>
-                }
-                sx={{ mx: 0, mb: 3, width: 1, justifyContent: 'space-between' }}
-              />
-            )}
-
-          </Card>
-        </Grid>
 
         <Grid item xs={12} md={8}>
         <Card sx={{ p: 6 }}>
@@ -244,6 +280,81 @@ const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
         </Card>
         </Grid>
           </Grid>
+          <Grid item xs={12}>
+            <Card>
+
+            <PermissionTableToolbar
+            isFiltered={isFiltered}
+            filterName={filterName}
+            // filterRole={filterRole}
+            // optionsRole={ROLE_OPTIONS}
+            onFilterName={handleFilterName}
+            // onFilterRole={handleFilterRole}
+            onResetFilter={handleResetFilter}
+          />
+
+            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+              <TableSelectedAction
+              dense={dense}
+              numSelected={selected.length}
+              rowCount={tableData.length}
+              onSelectAllRows={(checked) =>
+                onSelectAllRows(
+                  checked,
+                  tableData.map((row) => row.id)
+                )
+              }
+            />
+            <Table size={52 ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
+                <TableHeadCustom
+                  order={order}
+                  orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={tableData.length}
+                  numSelected={selected.length}
+                  onSort={onSort}
+                  onSelectAllRows={(checked) =>
+                    onSelectAllRows(
+                      checked,
+                      tableData.map((row) => row.id)
+                    )
+                  }
+                />
+
+                <TableBody>
+                  {dataFiltered
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <PermissionTableRow
+                        key={row.id}
+                        row={row}
+                        selected={selected.includes(row.id)}
+                        onSelectRow={() => onSelectRow(row.id)}
+                      />
+                    ))}
+
+                  <TableEmptyRows
+                    height={denseHeight}
+                    emptyRows={emptyRows(page, rowsPerPage, tableData.length)}
+                  />
+
+                  <TableNoData isNotFound={isNotFound} />
+                </TableBody>
+              </Table>
+          </TableContainer>
+
+          <TablePaginationCustom
+            count={dataFiltered.length}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={onChangePage}
+            onRowsPerPageChange={onChangeRowsPerPage}
+            //
+            dense={dense}
+            // onChangeDense={onChangeDense}
+          />
+            </Card>
+          </Grid>
         </CardContent>
 
         <Divider sx={{ margin: 0 }} />
@@ -266,6 +377,40 @@ const RoleAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     </Grid>
     </>
   )
+}
+
+function applyFilter({
+  inputData,
+  comparator,
+  filterName,
+  filterStatus,
+}: {
+  inputData: IPermissionGeneral[];
+  comparator: (a: any, b: any) => number;
+  filterName: string;
+  filterStatus: number;
+}) {
+  const stabilizedThis = inputData.map((el, index) => [el, index] as const);
+
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+
+  inputData = stabilizedThis.map((el) => el[0]);
+
+  if (filterName) {
+    inputData = inputData.filter(
+      (permission) => permission.permissionName.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+    );
+  }
+
+  if (filterStatus !== 10) {
+    inputData = inputData.filter((permission) => permission.status === filterStatus);
+  }
+
+  return inputData;
 }
 
 export default RoleAddEditForm

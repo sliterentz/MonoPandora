@@ -9,6 +9,7 @@ const userToken = localStorage.getItem('accessToken')
   : null;
  
 const initialState: IPermissionState = {
+  currentPermission: null,
   isLoading: false,
   error: null,
   permissions: [],
@@ -38,6 +39,7 @@ const slice = createSlice({
 
     // GET PERMISSION
     getPermissionSuccess(state, action) {
+      state.currentPermission = action.payload;
       state.isLoading = false;
       state.permission = action.payload;
     },
@@ -62,10 +64,28 @@ return async (dispatch: Dispatch) => {
         'Authorization': 'Bearer '+ accessToken,
       }
 
-      const response = await axios.get('/api/v1/permission', { params: { page: 1, take: 5 }, headers });
-      dispatch(slice.actions.getPermissionsSuccess(response.data.data.content))
+      const response = await axios.get('/api/v1/access/permissions', { params: {limit:20}, headers });
+      dispatch(slice.actions.getPermissionsSuccess(response.data.data.data))
     } catch(error) {
       dispatch(slice.actions.hasError(error));
     }
   };
 }
+
+export function fetchPermissionData(id: number) {
+  return async (dispatch: Dispatch) => {
+    dispatch(slice.actions.startLoading());
+      try {
+        const accessToken = userToken;
+        const headers = {
+          'Authorization': 'Bearer '+ accessToken,
+        }
+
+        const response = await axios.get('/api/v1/access/permission/'+id, { headers });
+
+        dispatch(slice.actions.getPermissionSuccess(response.data.data))
+      } catch(error) {
+        dispatch(slice.actions.hasError(error));
+      }
+    };
+  }

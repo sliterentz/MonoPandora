@@ -1,13 +1,8 @@
-import { useState, useEffect } from 'react'
-import { Link as RouterLink } from 'react-router-dom'
+import { useEffect } from 'react'
 
 import { useParams } from 'react-router-dom';
 // @mui
 import { Container } from '@mui/material';
-// routes
-import { PATH_DASHBOARD } from '@theme-ui';
-// _mock_
-import { _userList } from '../../_mock/arrays'
 
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -24,11 +19,11 @@ export default function UserEditPage() {
   const { id } = useParams();  // Get the user ID from the URL
   const dispatch = useDispatch();
 
-  const { role } = useSelector((state) => state.role);
+  const { currentRole } = useSelector((state) => state.role);
   
   useEffect(() => {
     if (id) {
-      dispatch(fetchRoleData(id));
+      dispatch(fetchRoleData(parseInt(id,10)));
     }
   }, [dispatch, id]);
 
@@ -36,7 +31,7 @@ export default function UserEditPage() {
   return (
     <UserLayout>
       <Container maxWidth='lg'>
-        <RoleAddEditForm isEdit={true} currentUser={role} />
+        <RoleAddEditForm isEdit={true} currentRole={currentRole} />
       </Container>
     </UserLayout>
   );

@@ -7,7 +7,7 @@ export type TableProps = {
     order: 'asc' | 'desc';
     orderBy: string;
     //
-    selected: string[];
+    selected: string[] | number[];
     onSelectRow: (id: string) => void;
     onSelectAllRows: (checked: boolean, newSelecteds: string[]) => void;
     //

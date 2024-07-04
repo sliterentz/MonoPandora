@@ -5,7 +5,7 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
 import Link from '@mui/material/Link'
-import Box from '@mui/material/Box';
+import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import { Tabs, Tab } from '@mui/material'
 import Typography from '@mui/material/Typography'
@@ -15,7 +15,7 @@ import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 
 // import { cyan, purple } from '@mui/material/colors';
-import { useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles'
 
 import TablePagination from '@mui/material/TablePagination'
 import CardHeader from '@mui/material/CardHeader'
@@ -64,7 +64,7 @@ const TABLE_HEAD = [
 ];
 
 const RolePage = () => {
-  const theme = useTheme();
+  // const theme = useTheme();
 
   const {
     dense,
@@ -141,7 +141,7 @@ const RolePage = () => {
       setFilterStatus(newValue);
     };
 
-    const handleDeleteRow = (id: string) => {
+    const handleDeleteRow = (id: number) => {
       const deleteRow = tableData.filter((row) => row.id !== id);
       setSelected([]);
       setTableData(deleteRow);
@@ -153,7 +153,7 @@ const RolePage = () => {
       }
     };
 
-    const handleDeleteRows = (selectedRows: string[]) => {
+    const handleDeleteRows = (selectedRows: number[]) => {
       const deleteRows = tableData.filter((row) => !selectedRows.includes(row.id));
       setSelected([]);
       setTableData(deleteRows);
@@ -170,7 +170,7 @@ const RolePage = () => {
       }
     };
 
-    const handleEditRow = (id: string) => {
+    const handleEditRow = (id: number) => {
         navigate(PATH_DASHBOARD.role.edit(id));
       };
 

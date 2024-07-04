@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { useParams } from 'react-router-dom';
 
 // ** React Imports
 import { ChangeEvent, forwardRef, MouseEvent, useState, useCallback, useEffect, useMemo } from 'react'
@@ -29,8 +30,17 @@ import CardActions from '@mui/material/CardActions'
 import FormControl from '@mui/material/FormControl'
 import OutlinedInput from '@mui/material/OutlinedInput'
 import InputAdornment from '@mui/material/InputAdornment'
-import Switch from '@mui/material/Switch';
+import Switch from '@mui/material/Switch'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
+import Checkbox from '@mui/material/Checkbox'
+import ListItemText from '@mui/material/ListItemText'
+import TableContainer from '@mui/material/TableContainer'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+
+// redux
+import { useDispatch, useSelector } from '../../redux/store';
+import { fetchRolesData } from '../../redux/slices/roleThunk';
 
 // ** Icons Imports
 import EyeOutline from 'mdi-material-ui/EyeOutline'
@@ -39,9 +49,6 @@ import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
 // ** Styled Component
 import { UserLayout, fData } from '@theme-ui'
 import { Label } from '@theme-ui';
-
-// redux
-import { useDispatch } from '../../redux/store';
 
 // ** Import Form Provider
 import { useForm, Controller } from 'react-hook-form';
@@ -59,6 +66,10 @@ interface State {
   showPassword2: boolean
 }
 
+import { useTable, TablePaginationCustom, TableSelectedAction, TableHeadCustom, TableEmptyRows, TableNoData, getComparator, emptyRows } from '@theme-ui'
+
+import RoleTableRow from '../../sections/user/RoleTableRow'
+
 interface FormValuesProps extends Omit<IUserAccountGeneral, 'avatarUrl'>  {
     avatarUrl: CustomFile | string | null;
     afterSubmit?: string;
@@ -69,12 +80,57 @@ interface FormValuesProps extends Omit<IUserAccountGeneral, 'avatarUrl'>  {
     currentUser?: IUserAccountGeneral;
   };
 
-const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
+  import { IRoleGeneral } from '@theme-ui'
 
-  const { createUser } = useAuthContext();
+  const TABLE_HEAD = [
+    { id: 'id', label: 'ID', align: 'left' },
+    { id: 'roleName', label: 'Name', align: 'left' },
+    { id: 'status', label: 'Status', align: 'left' },
+  ];
+
+const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
+  const { id = '' } = useParams<{ id: string }>();
+
+  const {
+    dense,
+    page,
+    order,
+    orderBy,
+    rowsPerPage,
+    setPage,
+    //
+    selected,
+    setSelected,
+    onSelectRow,
+    onSelectAllRows,
+    //
+    onSort,
+    onChangeDense,
+    onChangePage,
+    onChangeRowsPerPage,
+  } = useTable();
+
+  const { createUser, updateUser } = useAuthContext();
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
+
+  // const [roleIds, setRoleIds] = useState<number[]>([]);
+  // const [roles, setRoles] = useState<number[]>([]);
+
+  const [filterName, setFilterName] = useState('');
+  const [filterStatus, setFilterStatus] = useState(10);
+
+  const [tableData, setTableData] = useState<IRoleGeneral[]>([]);
+
+  const { roles, isLoading } = useSelector((state) => state.role);
+
+  const GRANT_OPTIONS = [
+    { value: 1, label: 'Super Admin' },
+    { value: 2, label: 'Supervisor' },
+    { value: 3, label: 'Employee' },
+    { value: 4, label: 'Client' }
+  ];
 
   // ** States
   // const [passwordValues, setPasswordValues] = useState<State>({
@@ -91,10 +147,11 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     email: currentUser?.email || '',
     phone: currentUser?.phone || '',
     fullname: currentUser?.fullname || '',
-    grant: currentUser?.grant || 3,
+    isSuperUser: currentUser?.isSuperUser || false,
     isVerified: currentUser?.isVerified || false,
     company: currentUser?.company || '',
     avatarUrl: currentUser?.avatarUrl || 'https://api-dev-minimal-v510.vercel.app/assets/images/avatar/avatar_1.jpg',
+    roleIds: currentUser?.roleIds || [], 
     status: currentUser?.status || 1,
     afterSubmit: '',
   }),
@@ -108,10 +165,11 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
     phone: Yup.string().required('Phone is required'),
     fullname: Yup.string().required('Fullname is required'),
-    grant: Yup.number().required('Role is required'),
+    isSuperUser: Yup.boolean().required('Grant is required'),
     isVerified: Yup.boolean().required('Verified is required'),
     company: Yup.string().required('Company is required'),
     // avatarUrl: Yup.string().required('Avatar is required').nullable(true),
+    roleIds: Yup.array().required('Roles is required'),
     status: Yup.number().required('Status is Required'),
   });
 
@@ -133,7 +191,14 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
   const values = watch();
 
   useEffect(() => {
+    dispatch(fetchRolesData());
+  }, [dispatch]);
+
+  useEffect(() => {
     if (isEdit && currentUser) {
+      // setRoleIds(roleIds);
+      // setRoles(roleIds);
+      setSelected(values.roleIds);
       reset(defaultValues);
     }
     if (!isEdit) {
@@ -142,8 +207,11 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     if (isSubmitSuccessful) {
       navigate('/pages/user');
     }
+    if (roles.length) {
+      setTableData(roles);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, currentUser,isSubmitSuccessful, dispatch, navigate]);
+  }, [isEdit, currentUser, isSubmitSuccessful, dispatch, navigate]);
 
   // Handle Password
   // const handlePasswordChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
@@ -167,17 +235,39 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     event.preventDefault()
   }
 
+  // const handleChange = (event: SelectChangeEvent<typeof roleIds>) => {
+  //   const {
+  //     target: { value },
+  //   } = event;
+  //   setRoleIds(
+  //     // On autofill we get a stringified value.
+  //     typeof value === 'string' ? value.split(',').map(Number) : value,
+  //   );
+  //   setRoles(
+  //     // On autofill we get a stringified value.
+  //     typeof value === 'string' ? value.split(',').map(Number) : value,
+  //   );
+  // };
+
   const onSubmit = async (data: FormValuesProps) => {
     try {
-      const isSuccess = await createUser(data.username, data.password, data.email, data.phone, data.fullname, data.grant, data.isVerified, data.company, data.avatarUrl, data.status);
 
+    if(!isEdit) {
+      const isSuccess = await createUser( data.fullname, data.email, data.phone, data.username, data.password, data.isSuperUser, data.isVerified, data.company, data.avatarUrl, data.status);
+      
       if (isSuccess) {
-        navigate(PATH_DASHBOARD.user)
+        navigate(PATH_DASHBOARD.user.root)
       }
-        
+    }
+
+    const isSuccess = await updateUser( id, data.fullname, data.email, data.phone, data.username, data.isSuperUser, data.isVerified, data.company, data.avatarUrl, selected, data.status);
+      
+    if (isSuccess) {
+      navigate(PATH_DASHBOARD.user.root)
+    }
+
       // console.log('DATA', data);
     } catch (error) {
-      console.error(error);
       reset();
       setError('afterSubmit', {
         ...error,
@@ -200,6 +290,21 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     },
     [setValue]
   );
+
+  const dataFiltered = applyFilter({
+    inputData: tableData,
+    comparator: getComparator(order, orderBy),
+    filterName,
+    filterStatus,
+  });
+
+  const denseHeight = dense ? 52 : 72;
+
+  const isFiltered = filterName !== '' || filterStatus !== 10;
+
+  const isNotFound =
+  (!dataFiltered.length && !!filterName) ||
+  (!dataFiltered.length && !!filterStatus);
 
   return (
     <>
@@ -253,14 +358,14 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
                 labelPlacement="start"
                 control={
                   <Controller
-                    name="status"
+                    name="isSuperUser"
                     control={control}
                     render={({ field }) => (
                       <Switch
                         {...field}
-                        checked={field.value !== 1}
+                        checked={field.value !== false}
                         onChange={(event) =>
-                          field.onChange(event.target.checked ? 'disable' : 'active')
+                          field.onChange(event.target.checked ? true : false)
                         }
                       />
                     )}
@@ -269,10 +374,10 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
                 label={
                   <>
                     <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-                      User Status
+                      Is Super User
                     </Typography>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                      Apply disable account
+                      Apply for Super User Account
                     </Typography>
                   </>
                 }
@@ -382,13 +487,13 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
               {/*    }*/}
               {/*  />*/}
               {/*</FormControl>*/}
-              
+
             </Box>
 
             <Grid item xs={12} md={4}>
               <Divider sx={{ marginTop: 4 }} />
             </Grid>
-            
+
             <Box
               rowGap={3}
               columnGap={2}
@@ -409,21 +514,29 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
                 <RHFTextField fullWidth name="fullname" label='Full Name' sx={{ marginBottom: 2 }} placeholder='Leonard Carter' />
                 <RHFTextField fullWidth name="phone" label='Phone No.' sx={{ marginBottom: 2 }} placeholder='+62-812-456-8790' />
 
-              <FormControl fullWidth>
+              {/* <FormControl fullWidth>
                 <InputLabel id='role-label'>Role</InputLabel>
                 <Select
-                  label='Role'
-                  name='role'
-                  defaultValue='3'
-                  id='role'
+                  label='Roles'
+                  name='roleIds'
+                  defaultValue={roleIds}
+                  multiple
+                  id='roleIds'
                   labelId='role-label'
+                  onChange={handleChange}
+                  renderValue={(selected) => 
+                    GRANT_OPTIONS.filter(option => selected.includes(option.value))
+                      .map(option => option.label).join(', ')
+                  }
                 >
-                  <MenuItem value='0'>Super Admin</MenuItem>
-                  <MenuItem value='1'>Supervisor</MenuItem>
-                  <MenuItem value='2'>Employee</MenuItem>
-                  <MenuItem value='3'>Client</MenuItem>
+                  { GRANT_OPTIONS.map((role) => (
+                  <MenuItem key={role.value} value={role.value}>
+                    <Checkbox checked={roleIds.includes(role.value)} />
+                    <ListItemText primary={role.label} />
+                  </MenuItem>
+                ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
 
               <RHFTextField fullWidth name="company" label='Company' sx={{ marginBottom: 2 }} placeholder='Samsung LTD' />
 
@@ -443,6 +556,72 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
             </Box>
         </Card>
         </Grid>
+
+        <Grid item xs={12}>
+            <Card>
+
+            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+              <TableSelectedAction
+              dense={dense}
+              numSelected={selected.length}
+              rowCount={tableData.length}
+              onSelectAllRows={(checked) =>
+                onSelectAllRows(
+                  checked,
+                  tableData.map((row) => row.id)
+                )
+              }
+            />
+            <Table size={52 ? 'small' : 'medium'} sx={{ minWidth: 800 }}>
+                <TableHeadCustom
+                  order={order}
+                  orderBy={orderBy}
+                  headLabel={TABLE_HEAD}
+                  rowCount={tableData.length}
+                  numSelected={selected.length}
+                  onSort={onSort}
+                  onSelectAllRows={(checked) =>
+                    onSelectAllRows(
+                      checked,
+                      tableData.map((row) => row.id)
+                    )
+                  }
+                />
+
+                <TableBody>
+                  {dataFiltered
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <RoleTableRow
+                        key={row.id}
+                        row={row}
+                        selected={selected.includes(row.id)}
+                        onSelectRow={() => onSelectRow(row.id)}
+                      />
+                    ))}
+
+                  <TableEmptyRows
+                    height={denseHeight}
+                    emptyRows={emptyRows(page, rowsPerPage, tableData.length)}
+                  />
+
+                  <TableNoData isNotFound={isNotFound} />
+                </TableBody>
+              </Table>
+          </TableContainer>
+
+          <TablePaginationCustom
+            count={dataFiltered.length}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={onChangePage}
+            onRowsPerPageChange={onChangeRowsPerPage}
+            //
+            dense={dense}
+            // onChangeDense={onChangeDense}
+          />
+            </Card>
+          </Grid>
 
           </Grid>
         </CardContent>
@@ -466,6 +645,40 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     </Grid>
     </>
   )
+}
+
+function applyFilter({
+  inputData,
+  comparator,
+  filterName,
+  filterStatus,
+}: {
+  inputData: IRoleGeneral[];
+  comparator: (a: any, b: any) => number;
+  filterName: string;
+  filterStatus: number;
+}) {
+  const stabilizedThis = inputData.map((el, index) => [el, index] as const);
+
+  stabilizedThis.sort((a, b) => {
+    const order = comparator(a[0], b[0]);
+    if (order !== 0) return order;
+    return a[1] - b[1];
+  });
+
+  inputData = stabilizedThis.map((el) => el[0]);
+
+  if (filterName) {
+    inputData = inputData.filter(
+      (role) => role.roleName.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+    );
+  }
+
+  if (filterStatus !== 10) {
+    inputData = inputData.filter((role) => role.status === filterStatus);
+  }
+
+  return inputData;
 }
 
 export default UserAddEditForm

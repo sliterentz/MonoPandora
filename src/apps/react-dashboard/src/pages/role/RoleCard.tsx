@@ -9,16 +9,15 @@ import { CustomAvatarGroup } from '@theme-ui'
 
 // ** Icons Imports
 import Heart from 'mdi-material-ui/Heart'
-import Facebook from 'mdi-material-ui/Facebook'
 import ShareVariant from 'mdi-material-ui/ShareVariant'
 
 import { _roleList } from '../../_mock/arrays'
 
 const ROLE_OPTIONS = [
-    { roleName: 'Super Admin', backgroundColor: 'primary.main', totalUser: 1 },
-    { roleName: 'Supervisor', backgroundColor: 'success.main', totalUser: 3 },
-    { roleName: 'Employee', backgroundColor: 'info.main', totalUser: 3 },
-    { roleName: 'Client', backgroundColor: 'warning.main', totalUser: 3 },
+    { id: 1, roleName: 'Super Admin', backgroundColor: 'primary.main', totalUser: 1 },
+    { id: 2, roleName: 'Supervisor', backgroundColor: 'success.main', totalUser: 3 },
+    { id: 3, roleName: 'Employee', backgroundColor: 'info.main', totalUser: 3 },
+    { id: 4, roleName: 'Client', backgroundColor: 'warning.main', totalUser: 3 },
 ];
 
 const ROLE_USERS = [
@@ -37,10 +36,10 @@ const ROLE_USERS = [
 const RoleCard = () => {
   return (
     <Grid container spacing={6}>
-    { ROLE_OPTIONS.map((card, index) => {
+    { ROLE_OPTIONS.map((card) => {
         const users = ROLE_USERS.filter(user => user.role === card.roleName);
         return (
-    <Grid item xs={12} sm={6} md={4}>
+    <Grid item xs={12} sm={6} md={4} key={card.id} >
     <Card sx={{ border: 0, boxShadow: 0, color: 'common.white', backgroundColor: `${card.backgroundColor}` }}>
       <CardContent sx={{ padding: theme => `${theme.spacing(3.25, 5, 4.5)} !important` }}>
             <Typography variant='subtitle2' sx={{ marginBottom: 3, color: 'common.white' }}> Total {card.totalUser} users </Typography>   

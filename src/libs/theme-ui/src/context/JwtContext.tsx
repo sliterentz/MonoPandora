@@ -4,7 +4,7 @@ import axios from '../lib/utils/axios';
 import localStorageAvailable from '../lib/utils/localStorageAvailable';
 //
 import { isValidToken, setSession } from './utils';
-import { ActionMapType, AuthStateType, AuthUserType, JWTContextType } from './types';
+import { ActionMapType, AuthStateType, AuthUserType, AuthRoleType, AuthPermissionType, JWTContextType } from './types';
 
 // ----------------------------------------------------------------------
 
@@ -19,6 +19,11 @@ enum Types {
   LOGIN = 'LOGIN',
   REGISTER = 'REGISTER',
   CREATEUSER = 'CREATEUSER',
+  UPDATEUSER = 'UPDATEUSER',
+  CREATEROLE = 'CREATEROLE',
+  UPDATEROLE = 'UPDATEROLE',
+  CREATEPERMISSION = 'CREATEPERMISSION',
+  UPDATEPERMISSION = 'UPDATEPERMISSION',
   VERIFY = 'VERIFY',
   PROFILE = 'PROFILE',
   LOGOUT = 'LOGOUT',
@@ -37,6 +42,21 @@ type Payload = {
   };
   [Types.CREATEUSER]: {
     user: AuthUserType;
+  };
+  [Types.UPDATEUSER]: {
+    user: AuthUserType;
+  };
+  [Types.CREATEROLE]: {
+    role: AuthRoleType;
+  };
+  [Types.UPDATEROLE]: {
+    role: AuthRoleType;
+  };
+  [Types.CREATEPERMISSION]: {
+    permission: AuthPermissionType;
+  };
+  [Types.UPDATEPERMISSION]: {
+    permission: AuthPermissionType;
   };
   [Types.PROFILE]: {
     isAuthenticated: boolean;
@@ -83,6 +103,41 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
       ...state,
       isAuthenticated: true,
       user: action.payload.user,
+    };
+  }
+  if (action.type === Types.UPDATEUSER) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      user: action.payload.user,
+    };
+  }
+  if (action.type === Types.CREATEROLE) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      role: action.payload.role,
+    };
+  }
+  if (action.type === Types.UPDATEROLE) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      role: action.payload.role,
+    };
+  }
+  if (action.type === Types.CREATEPERMISSION) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      permission: action.payload.permission,
+    };
+  }
+  if (action.type === Types.UPDATEPERMISSION) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      permission: action.payload.permission,
     };
   }
   if (action.type === Types.VERIFY) {
@@ -190,17 +245,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
     })
 
     if (response) {
-    const { accessToken, user } = response.data.data;
+    const { user } = response.data.data;
+    const { accessToken } = response.data.data.token;
+    const { roleName } = response.data.data.access.roles[0];
 
     setSession(accessToken);
 
     localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('user', JSON.stringify(user[0]));
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('role', JSON.stringify(roleName));
 
     dispatch({
       type: Types.LOGIN,
       payload: {
-        user,
+        user: null,
       },
     });
   }
@@ -208,13 +266,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // REGISTER
   const register = useCallback(
-    async (email: string, password: string, fullname: string, grant: number, isVerified: boolean, status: number) => {
+    async (email: string, password: string, fullname: string, isSuperUser: boolean, isVerified: boolean, status: number) => {
       try {
       const response = await axios.post('/api/v1/auth/signup', {
         email,
         password,
         fullname,
-        grant,
+        isSuperUser,
         isVerified,
         status,
       });
@@ -264,7 +322,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         localStorage.setItem('accessToken', token);
         axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-      
+
       //   const headers = {
       //   'Authorization': 'Bearer '+token,
       // };
@@ -274,7 +332,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (response.status === 200) {
         const { user } = response.data;
         localStorage.setItem('user', user);
-        
+
         dispatch({
           type: Types.PROFILE,
           payload: {
@@ -283,7 +341,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       });
     }
-    
+
     } catch(err) {
       console.log(err)
     }
@@ -293,7 +351,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // CREATE USER
   const createUser = useCallback(
-      async (username: string, password: string, email: string, phone: string, fullname: string, grant: number, isVerified: boolean, company: string, avatarUrl: string, status: number) => {
+      async (username: string, password: string, email: string, phone: string, fullname: string, isSuperUser: boolean, isVerified: boolean, company: string, avatarUrl: string, status: number) => {
         try {
         const response = await axios.post('/api/v1/auth/user/create', {
           username,
@@ -301,7 +359,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           email,
           phone,
           fullname,
-          grant,
+          isSuperUser,
           isVerified,
           company,
           avatarUrl,
@@ -309,9 +367,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         });
 
         const { user } = response.data;
-  
+
         // localStorage.setItem('accessToken', accessToken);
-  
+
         dispatch({
           type: Types.CREATEUSER,
           payload: {
@@ -323,6 +381,162 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       },
       []
+  );
+
+  // EDIT USER
+  const updateUser = useCallback(
+    async (id: string, 
+      fullname: string,
+      email: string,
+      phone: string,
+      username: string,
+      isSuperUser: boolean,
+      isVerified: boolean,
+      company: string,
+      avatarUrl: string,
+      roleIds: number[],
+      status: number
+    ) => {
+      try {
+        // const token = localStorage.getItem('accessToken');
+        // const headers = {
+        //   'Authorization': 'Bearer '+ token,
+        // }
+        // axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+        const roles = roleIds;
+
+        const response = await axios.put(`/api/v1/auth/user/${id}`, { fullname, email, phone, username, isSuperUser, isVerified, company, avatarUrl, roleIds, roles, status });
+
+        const { user } = response.data;
+
+        dispatch({
+          type: Types.UPDATEUSER,
+          payload: {
+            user,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
+  // CREATE ROLE
+  const createRole = useCallback(
+      async (roleName: string, permissions: number[], status: number) => {
+        try {
+        const response = await axios.post('/api/v1/access/role/create', {
+          roleName,
+          permissions,
+          status,
+        });
+
+        const { role } = response.data;
+
+        // localStorage.setItem('accessToken', accessToken);
+
+        dispatch({
+          type: Types.CREATEROLE,
+          payload: {
+            role,
+          },
+        });
+      } catch(err) {
+        console.log(err)
+      }
+      },
+      []
+  );
+
+  // EDIT ROLE
+  const updateRole = useCallback(
+    async (id: string, 
+      roleName: string,
+      permissionIds: number[],
+      status: number
+    ) => {
+      try {
+        // const token = localStorage.getItem('accessToken');
+        // const headers = {
+        //   'Authorization': 'Bearer '+ token,
+        // }
+        // axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+        const permissions = permissionIds;
+
+        const response = await axios.put(`/api/v1/access/role/${id}`, { roleName, permissions, status });
+
+        const { role } = response.data;
+
+        dispatch({
+          type: Types.UPDATEROLE,
+          payload: {
+            role,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
+  );
+
+    // CREATE PERMISSION
+    const createPermission = useCallback(
+      async (permissionName: string, description: string, status: number) => {
+        try {
+        const response = await axios.post('/api/v1/access/permission/create', {
+          permissionName,
+          description,
+          status,
+        });
+
+        const { role } = response.data;
+
+        // localStorage.setItem('accessToken', accessToken);
+
+        dispatch({
+          type: Types.CREATEROLE,
+          payload: {
+            role,
+          },
+        });
+      } catch(err) {
+        console.log(err)
+      }
+      },
+      []
+  );
+
+  // EDIT PERMISSION
+  const updatePermission = useCallback(
+    async (id: string, 
+      permissionName: string,
+      description: string,
+      status: number
+    ) => {
+      try {
+        // const token = localStorage.getItem('accessToken');
+        // const headers = {
+        //   'Authorization': 'Bearer '+ token,
+        // }
+        // axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+
+        const response = await axios.put(`/api/v1/access/permission/${id}`, { permissionName, description, status });
+
+        const { role } = response.data;
+
+        dispatch({
+          type: Types.UPDATEROLE,
+          payload: {
+            role,
+          },
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    []
   );
 
   // LOGOUT
@@ -347,9 +561,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       verify,
       profile,
       createUser,
+      updateUser,
+      createRole,
+      updateRole,
+      createPermission,
+      updatePermission,
       logout,
     }),
-    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify, profile, createUser]
+    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify, profile, createUser, updateUser, createRole, updateRole, createPermission, updatePermission]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

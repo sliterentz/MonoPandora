@@ -1,7 +1,5 @@
 import { useState } from 'react'
 
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
-
 // @mui
 import {
   Stack,
@@ -9,14 +7,13 @@ import {
   Button,
   Checkbox,
   TableRow,
-  Link,
   MenuItem,
   TableCell,
   IconButton,
   Typography,
 } from '@mui/material';
 // @types
-import { IUserAccountGeneral, PATH_DASHBOARD } from '@theme-ui';
+import { IUserAccountGeneral } from '@theme-ui';
 
 // components
 import { Label, Iconify } from '@theme-ui';
@@ -24,8 +21,8 @@ import { Label, Iconify } from '@theme-ui';
 import { MenuPopover } from '@theme-ui';
 import { ConfirmDialog } from '@theme-ui';
 
-import CheckCircleOutline from 'mdi-material-ui/CheckCircleOutline'
-import ClockOutline from 'mdi-material-ui/ClockOutline'
+// import CheckCircleOutline from 'mdi-material-ui/CheckCircleOutline'
+// import ClockOutline from 'mdi-material-ui/ClockOutline'
 import DotsVertical from 'mdi-material-ui/DotsVertical'
 import DeleteOutline from 'mdi-material-ui/DeleteOutline'
 import Pencil from 'mdi-material-ui/Pencil'
@@ -48,13 +45,7 @@ export default function UserTableRow({
   onDeleteRow,
 }: Props) {
 
-  // ** States
-  const [anchorEl, setAnchorEl] = useState<Element | null>(null)
-
-  // ** Hooks
-  const navigate = useNavigate()
-
-  const { fullname, avatarUrl, email, grant, isVerified, status } = row;
+  const { fullname, avatarUrl, email, isSuperUser, isVerified, status } = row;
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
@@ -76,13 +67,6 @@ export default function UserTableRow({
     setOpenPopover(null);
   };
 
-  const handleEditClick = (url?: string) => {
-    if (url) {
-      navigate(url)
-    }
-    setAnchorEl(null)
-  }
-
     return (
     <>
       <TableRow hover selected={selected}>
@@ -103,10 +87,8 @@ export default function UserTableRow({
         <TableCell align="left">{email}</TableCell>
 
         <TableCell align="left" sx={{ textTransform: 'capitalize' }}>
-          {(grant === 1 && 'Super Admin') ||
-          (status === 2 && 'Supervisor') ||
-          (status === 3 && 'Employee') ||
-          'Client' }
+          {(isSuperUser === true && 'Super Admin') ||
+          'User' }
         </TableCell>
         <TableCell align="center">
           {/* { isVerified ? (
@@ -164,7 +146,6 @@ export default function UserTableRow({
         <MenuItem
           onClick={() => {
             onEditRow();
-            // handleEditClick('/pages/user/'+row.id+'/edit');
             handleClosePopover();
           }}>
           <Pencil />

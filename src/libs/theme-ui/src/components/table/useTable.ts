@@ -10,7 +10,7 @@ export type UseTableProps = {
   defaultDense?: boolean;
   defaultOrder?: 'asc' | 'desc';
   defaultOrderBy?: string;
-  defaultSelected?: string[];
+  defaultSelected?: (string | number)[];
   defaultRowsPerPage?: number;
   defaultCurrentPage?: number;
 };
@@ -26,7 +26,7 @@ export default function useTable(props?: UseTableProps): ReturnType {
 
   const [rowsPerPage, setRowsPerPage] = useState(props?.defaultRowsPerPage || 5);
 
-  const [selected, setSelected] = useState<string[]>(props?.defaultSelected || []);
+  const [selected, setSelected] = useState<(string | number)[]>(props?.defaultSelected || []);
 
   const onSort = useCallback(
     (id: string) => {
@@ -40,10 +40,10 @@ export default function useTable(props?: UseTableProps): ReturnType {
   );
 
   const onSelectRow = useCallback(
-    (id: string) => {
+    (id: string | number) => {
       const selectedIndex = selected.indexOf(id);
 
-      let newSelected: string[] = [];
+      let newSelected: (string | number)[] = [];
 
       if (selectedIndex === -1) {
         newSelected = newSelected.concat(selected, id);

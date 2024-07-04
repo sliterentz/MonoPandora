@@ -6,12 +6,14 @@ export type IUserAccountGeneral = {
     email: string;
     phone: string;
     status: number;
-    grant: number;
+    isSuperUser: boolean;
     isVerified: boolean;
     company: string;
     avatarUrl: string;
+    roleIds: number[];
+    roles: number[];
   };
-  
+
   interface UserState {
     currentUser: IUserAccountGeneral | null;
     loading: boolean;

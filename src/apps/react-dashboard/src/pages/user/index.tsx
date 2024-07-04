@@ -65,7 +65,7 @@ import UserVerifyStatusAnalytic from '../../sections/user/UserVerifyStatusAnalyt
 const TABLE_HEAD = [
   { id: 'fullname', label: 'Name', align: 'left' },
   { id: 'email', label: 'Email', align: 'left' },
-  { id: 'grant', label: 'Role', align: 'left' },
+  { id: 'roles', label: 'Role', align: 'left' },
   { id: 'isVerified', label: 'Verified', align: 'center' },
   { id: 'status', label: 'Status', align: 'left' },
   { id: '' },
@@ -103,7 +103,7 @@ const UserPage = () => {
 
     const [filterName, setFilterName] = useState('');
 
-    const [filterRole, setFilterRole] = useState(3);
+    const [filterRole, setFilterRole] = useState([]);
 
     const [openConfirm, setOpenConfirm] = useState(false);
 
@@ -114,12 +114,12 @@ const UserPage = () => {
     useEffect(() => {
       dispatch(fetchUsersData());
     }, [dispatch]);
-  
+
     useEffect(() => {
       if (users.length) {
         setTableData(users);
       }
-    }, [users]);  
+    }, [users]);
 
     const dataFiltered = applyFilter({
       inputData: tableData,
@@ -420,7 +420,7 @@ function applyFilter({
   filterName: string;
   filterIsVerified: boolean;
   filterStatus: number;
-  filterRole: number;
+  filterRole: number[];
 }) {
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -446,8 +446,8 @@ function applyFilter({
     inputData = inputData.filter((user) => user.status === filterStatus);
   }
 
-  if (filterRole !== 3) {
-    inputData = inputData.filter((user) => user.grant === filterRole);
+  if (filterRole.length) {
+    inputData = inputData.filter((user) => filterRole.includes(user.roles));
   }
 
   return inputData;

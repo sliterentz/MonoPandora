@@ -1,4 +1,5 @@
 import * as Yup from 'yup';
+import { useParams } from 'react-router-dom';
 
 // ** React Imports
 import { ChangeEvent, forwardRef, MouseEvent, useState, useCallback, useEffect, useMemo } from 'react'
@@ -35,7 +36,7 @@ import EyeOutline from 'mdi-material-ui/EyeOutline'
 import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
 
 // ** Styled Component
-import { UserLayout, fData } from '@theme-ui'
+import { UserLayout, fData, PATH_DASHBOARD } from '@theme-ui'
 import { Label } from '@theme-ui';
 
 // redux
@@ -47,46 +48,42 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuthContext } from '@theme-ui';
 import { FormProvider, RHFTextField, RHFSwitch, RHFUploadAvatar } from '@theme-ui';
 import { IPermissionGeneral } from '@theme-ui'
-import { CustomFile } from '@theme-ui';
 import { status } from 'nprogress';
 
-interface State {
-  password: string
-  password2: string
-  showPassword: boolean
-  showPassword2: boolean
-}
-
 interface FormValuesProps {
-    fullName: string;
+    permissionName: string;
+    description: string;
     status: number;
     afterSubmit?: string;
   };
 
   type Props = {
     isEdit?: boolean;
-    currentUser?: IPermissionGeneral;
+    currentPermission?: IPermissionGeneral;
   };
 
-const PermissionAddEditForm = ({ isEdit = false, currentUser }: Props) => {
+const PermissionAddEditForm = ({ isEdit = false, currentPermission }: Props) => {
+  const { id } = useParams();
 
-  const { createPermission } = useAuthContext();
+  const { createPermission, updatePermission } = useAuthContext();
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
 
   const defaultValues = useMemo(
   () => ({
-    permissionName: currentUser?.permissionName || '',
-    status: currentUser?.status || 1,
+    permissionName: currentPermission?.permissionName || '',
+    description: currentPermission?.description || '',
+    status: currentPermission?.status || 1,
     afterSubmit: '',
   }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentUser]
+    [currentPermission]
   );
 
   const AddUserSchema = Yup.object().shape({
     permissionName: Yup.string().required('Username required'),
+    description: Yup.string().required('Description required'),
     status: Yup.number().required('Status is Required'),
   });
 
@@ -108,7 +105,7 @@ const PermissionAddEditForm = ({ isEdit = false, currentUser }: Props) => {
   const values = watch();
 
   useEffect(() => {
-    if (isEdit && currentUser) {
+    if (isEdit && currentPermission) {
       reset(defaultValues);
     }
     if (!isEdit) {
@@ -118,7 +115,7 @@ const PermissionAddEditForm = ({ isEdit = false, currentUser }: Props) => {
       navigate('/pages/permission');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, currentUser,isSubmitSuccessful, dispatch, navigate]);
+  }, [isEdit, currentPermission,isSubmitSuccessful, dispatch, navigate]);
 
   const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
@@ -130,13 +127,27 @@ const PermissionAddEditForm = ({ isEdit = false, currentUser }: Props) => {
 
   const onSubmit = async (data: FormValuesProps) => {
     try {
-      const isSuccess = await createPermission(data.permissionName, data.status);
 
-      if (!isSuccess) {
-        setError('afterSubmit', {
+      let isSuccess = null;
+      if(!isEdit) {
+        isSuccess = await createPermission(data.permissionName, data.description, data.status);
+        
+        if (!isSuccess) {
+          setError('afterSubmit', {
           message: 'Failed Add Permission',
         });
       }
+    }
+
+    isSuccess = await updatePermission(id, data.permissionName, data.description, data.status);
+
+    if (!isSuccess) {
+      setError('afterSubmit', {
+        message: 'Failed Edit Permission',
+      });
+    }
+
+    navigate(PATH_DASHBOARD.permission.root)
         
       // console.log('DATA', data);
     } catch (error) {
@@ -225,7 +236,8 @@ const PermissionAddEditForm = ({ isEdit = false, currentUser }: Props) => {
               </Typography>
               <Grid item xs={12} md={4}></Grid>
 
-                <RHFTextField name="permissionName" label='Permission Name' placeholder='Staff' />
+                <RHFTextField name="permissionName" label='Permission Name' placeholder='user.users.read' />
+                <RHFTextField name="description" label='Description' placeholder='Permission detail' />
                 <FormControl fullWidth>
                 <InputLabel id='status-label'>Permission Status</InputLabel>
                 <Select
