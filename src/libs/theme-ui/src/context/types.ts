@@ -1,4 +1,4 @@
-import { IUserAccountGeneral, IRoleGeneral, IPermissionGeneral } from "../lib/types";
+import { IUserAccountGeneral, IRoleGeneral, IPermissionGeneral, IResponse } from "../lib/types";
 
   export type ActionMapType<M extends { [index: string]: any }> = {
     [Key in keyof M]: M[Key] extends undefined
@@ -34,14 +34,15 @@ import { IUserAccountGeneral, IRoleGeneral, IPermissionGeneral } from "../lib/ty
     user: AuthUserType;
     role: AuthRoleType;
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string, fullname: string, isSuperUser: boolean, isVerified: boolean, status: number) => Promise<void>;
+    register: (fullname: string, email: string, phone: string, username: string, password: string, isSuperUser: false, isVerified: false, company: '', avatarUrl: '', roles: [4], status: 1) => Promise<IResponse>;
     verify: (code1: string, code2: string, code3: string, code4: string, code5: string, code6: string) => Promise<void>;
-    createUser: (username: string, email: string, phone: string, password: string, fullname: string, isSuperUser: boolean, isVerified: boolean, company: string, avatarUrl: string, status: number) => Promise<IUserAccountGeneral>;
+    createUser: (username: string, password: string, email: string, phone: string, fullname: string, isSuperUser: boolean, isVerified: boolean, company: string, avatarUrl: string, roles: number[], status: number) => Promise<IUserAccountGeneral>;
     updateUser: (id: string, fullname: string, email: string, phone: string, username: string, isSuperUser: boolean, isVerified: boolean, company: string, avatarUrl: string, roles: number[], status: number) => Promise<IUserAccountGeneral>;
     createRole: (roleName: string, permissions: number[], status: number) => Promise<IRoleGeneral>;
     updateRole: (id: number, roleName: string, permissions: number[], status: number) => Promise<IRoleGeneral>;
     createPermission: (permissionName: string, description: string, status: number) => Promise<IPermissionGeneral>;
     updatePermission: (id: number, permissionName: string, description: string, status: number) => Promise<IPermissionGeneral>;
+    changePassword: (id: number, currentPassword: string, newPassword: string) => Promise<IUserAccountGeneral>;
     profile: (token: string) => Promise<void>;
     logout: () => void;
     loginWithGoogle?: () => void;

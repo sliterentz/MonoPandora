@@ -18,7 +18,7 @@ export { bgBlur } from './lib/utils/cssStyles';
 export { default as axios } from './lib/utils/axios';
 export { fDate, fTimestamp } from './lib/utils/formatTime';
 export { fShortenNumber, fData, fNumber, fCurrency } from './lib/utils/formatNumber';
-export { getDisplayName, getRoleName, getEmail, getVerifiedStatus } from './lib/utils/authHelper';
+export { getCurrentProfile, getCurrentAccess, getDisplayName, getRoleName, getEmail, getVerifiedStatus } from './lib/utils/authHelper';
 export { default as Router } from './routes';
 
 export { default as themeConfig } from './configs/themeConfig';

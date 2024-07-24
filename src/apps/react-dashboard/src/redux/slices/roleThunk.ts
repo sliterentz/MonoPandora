@@ -64,7 +64,7 @@ return async (dispatch: Dispatch) => {
         'Authorization': 'Bearer '+ accessToken,
       }
 
-      const response = await axios.get('/api/v1/access/roles', { headers });
+      const response = await axios.get('/api/v1/access/roles', { params: {limit:10}, headers });
       dispatch(slice.actions.getRolesSuccess(response.data.data.data))
     } catch(error) {
       dispatch(slice.actions.hasError(error));

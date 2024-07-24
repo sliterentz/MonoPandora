@@ -5,7 +5,7 @@ import localStorageAvailable from '../lib/utils/localStorageAvailable';
 //
 import { isValidToken, setSession } from './utils';
 import { ActionMapType, AuthStateType, AuthUserType, AuthRoleType, AuthPermissionType, JWTContextType } from './types';
-
+// import { types } from '@auth-lib';
 // ----------------------------------------------------------------------
 
 // NOTE:
@@ -18,6 +18,7 @@ enum Types {
   INITIAL = 'INITIAL',
   LOGIN = 'LOGIN',
   REGISTER = 'REGISTER',
+  CHANGEPASSWORD = 'CHANGEPASSWORD',
   CREATEUSER = 'CREATEUSER',
   UPDATEUSER = 'UPDATEUSER',
   CREATEROLE = 'CREATEROLE',
@@ -38,6 +39,9 @@ type Payload = {
     user: AuthUserType;
   };
   [Types.REGISTER]: {
+    user: AuthUserType;
+  };
+  [Types.CHANGEPASSWORD]: {
     user: AuthUserType;
   };
   [Types.CREATEUSER]: {
@@ -92,6 +96,13 @@ const reducer = (state: AuthStateType, action: ActionsType) => {
     };
   }
   if (action.type === Types.REGISTER) {
+    return {
+      ...state,
+      isAuthenticated: true,
+      user: action.payload.user,
+    };
+  }
+  if (action.type === Types.CHANGEPASSWORD) {
     return {
       ...state,
       isAuthenticated: true,
@@ -247,13 +258,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     if (response) {
     const { user } = response.data.data;
     const { accessToken } = response.data.data.token;
+    const { roles } = response.data.data.access;
     const { roleName } = response.data.data.access.roles[0];
 
     setSession(accessToken);
 
+    const mappedAccess = roles.map((item) => item.permissions);
+
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('role', JSON.stringify(roleName));
+    localStorage.setItem('access', JSON.stringify(mappedAccess));
 
     dispatch({
       type: Types.LOGIN,
@@ -266,17 +281,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // REGISTER
   const register = useCallback(
-    async (email: string, password: string, fullname: string, isSuperUser: boolean, isVerified: boolean, status: number) => {
+    async (fullname: string, email: string, phone: string, username: string, password: string) => {
       try {
+
       const response = await axios.post('/api/v1/auth/signup', {
-        email,
-        password,
         fullname,
-        isSuperUser,
-        isVerified,
-        status,
+        email,
+        phone,
+        username,
+        password,
+        isSuperUser: false,
+        isVerified: false,
+        company: '',
+        avatarUrl: '',
+        roles: [4],
+        status: 1,
       });
-      const { accessToken, user } = response.data;
+
+      const { accessToken, user } = response.data.data;
 
       localStorage.setItem('accessToken', accessToken);
 
@@ -287,7 +309,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       });
     } catch(err) {
-      console.log(err)
+      // console.log(err);
+      return {
+        code: JSON.parse(JSON.stringify(err)).code,
+        message: JSON.parse(JSON.stringify(err)).message,
+        data: [],
+      }
     }
     },
     []
@@ -315,6 +342,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     []
   );
 
+  // CHANGE PASSWORD
+  const changePassword = useCallback(
+    async (id: string, currentPassword: string, newPassword: string) => {
+        try {
+          
+          const response = await axios.put(`/api/v1/auth/user/changepassword/${id}`, { currentPassword, newPassword });
+  
+          const { user } = response.data;
+  
+          dispatch({
+            type: Types.CHANGEPASSWORD,
+            payload: {
+              user,
+            },
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      },
+      []
+  )
+  
   // PROFILE
   const profile = useCallback(
     async (token: string) => {
@@ -351,7 +400,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // CREATE USER
   const createUser = useCallback(
-      async (username: string, password: string, email: string, phone: string, fullname: string, isSuperUser: boolean, isVerified: boolean, company: string, avatarUrl: string, status: number) => {
+      async (username: string, password: string, email: string, phone: string, fullname: string, isSuperUser: boolean, isVerified: boolean, company: string, avatarUrl: string, roles: number[], status: number) => {
         try {
         const response = await axios.post('/api/v1/auth/user/create', {
           username,
@@ -363,6 +412,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           isVerified,
           company,
           avatarUrl,
+          roles,
           status,
         });
 
@@ -559,6 +609,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       loginWithTwitter: () => {},
       register,
       verify,
+      changePassword,
       profile,
       createUser,
       updateUser,
@@ -568,7 +619,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       updatePermission,
       logout,
     }),
-    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify, profile, createUser, updateUser, createRole, updateRole, createPermission, updatePermission]
+    [state.isAuthenticated, state.isInitialized, state.user, login, logout, register, verify, changePassword, profile, createUser, updateUser, createRole, updateRole, createPermission, updatePermission]
   );
 
   return <AuthContext.Provider value={memoizedValue}>{children}</AuthContext.Provider>;

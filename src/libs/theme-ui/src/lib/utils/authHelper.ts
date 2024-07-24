@@ -4,12 +4,33 @@ import localStorageAvailable from './localStorageAvailable';
 interface IProfile {
   fullname: string;
   email: string;
-  role: number;
+  role: string;
+  roles: string[];
+  access: string[];
   isVerified: boolean;
 }
 
 interface IRole {
   roleName: string
+}
+
+export const getCurrentProfile = () => {
+  const storageAvailable = localStorageAvailable();
+  const userData = storageAvailable ? localStorage.getItem('user') : '';
+
+  if (userData) {
+    return userData;
+  }
+}
+
+export const getCurrentAccess = () => {
+  const storageAvailable = localStorageAvailable();
+  const userAccess = storageAvailable ? localStorage.getItem('access') : '';
+
+  if (userAccess) {
+    const access: IProfile = JSON.parse(userAccess)
+    return access;
+  }
 }
 
 export const getDisplayName = () => {

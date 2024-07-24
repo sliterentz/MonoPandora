@@ -1,4 +1,5 @@
-import { createSlice, Dispatch } from '@reduxjs/toolkit';
+import { createSlice, Dispatch, PayloadAction } from '@reduxjs/toolkit';
+import { IPermissionGeneral } from '@theme-ui'
 
 // utils
 import { axios } from '@theme-ui';
@@ -42,6 +43,10 @@ const slice = createSlice({
       state.currentPermission = action.payload;
       state.isLoading = false;
       state.permission = action.payload;
+    },
+
+    setPermissions(state, action: PayloadAction<IPermissionGeneral[]>) {
+      state.permissions = action.payload;
     },
   },
 });

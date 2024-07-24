@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 import { useParams } from 'react-router-dom';
 
 // ** React Imports
-import { ChangeEvent, forwardRef, MouseEvent, useState, useCallback, useEffect, useMemo } from 'react'
+import { ChangeEvent, forwardRef, MouseEvent, useState, useCallback, useEffect, useMemo, SyntheticEvent } from 'react'
 
 // ** Next Imports
 import { useNavigate } from 'react-router-dom'
@@ -37,6 +37,11 @@ import ListItemText from '@mui/material/ListItemText'
 import TableContainer from '@mui/material/TableContainer'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
+import TabList from '@mui/lab/TabList'
+import TabPanel from '@mui/lab/TabPanel'
+import TabContext from '@mui/lab/TabContext'
+import { styled } from '@mui/material/styles'
+import MuiTab, { TabProps } from '@mui/material/Tab'
 
 // redux
 import { useDispatch, useSelector } from '../../redux/store';
@@ -45,6 +50,8 @@ import { fetchRolesData } from '../../redux/slices/roleThunk';
 // ** Icons Imports
 import EyeOutline from 'mdi-material-ui/EyeOutline'
 import EyeOffOutline from 'mdi-material-ui/EyeOffOutline'
+import AccountOutline from 'mdi-material-ui/AccountOutline'
+import LockOpenOutline from 'mdi-material-ui/LockOpenOutline'
 
 // ** Styled Component
 import { UserLayout, fData } from '@theme-ui'
@@ -60,9 +67,12 @@ import { CustomFile } from '@theme-ui';
 import { status } from 'nprogress';
 
 interface State {
-  password: string
+  currentPassword: string
+  newPassword: string
   password2: string
   showPassword: boolean
+  showCurrentPassword: boolean
+  showNewPassword: boolean
   showPassword2: boolean
 }
 
@@ -74,6 +84,14 @@ interface FormValuesProps extends Omit<IUserAccountGeneral, 'avatarUrl'>  {
     avatarUrl: CustomFile | string | null;
     afterSubmit?: string;
   };
+
+  interface PasswordValuesProps {
+    currentPassword: string
+    newPassword: string
+    password2: string
+    showPassword: boolean
+    afterSubmit?: string
+  }
 
   type Props = {
     isEdit?: boolean;
@@ -88,8 +106,33 @@ interface FormValuesProps extends Omit<IUserAccountGeneral, 'avatarUrl'>  {
     { id: 'status', label: 'Status', align: 'left' },
   ];
 
+  const Tab = styled(MuiTab)<TabProps>(({ theme }) => ({
+    [theme.breakpoints.down('md')]: {
+      minWidth: 100
+    },
+    [theme.breakpoints.down('sm')]: {
+      minWidth: 67
+    }
+  }))
+  
+  const TabName = styled('span')(({ theme }) => ({
+    lineHeight: 1.71,
+    fontSize: '0.875rem',
+    marginLeft: theme.spacing(2.4),
+    [theme.breakpoints.down('md')]: {
+      display: 'none'
+    }
+  }))
+
 const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
   const { id = '' } = useParams<{ id: string }>();
+
+  // ** State
+  const [tabValue, setTabValue] = useState<string>('account')
+
+  const handleChange = (event: SyntheticEvent, newValue: string) => {
+    setTabValue(newValue)
+  }
 
   const {
     dense,
@@ -110,7 +153,7 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     onChangeRowsPerPage,
   } = useTable();
 
-  const { createUser, updateUser } = useAuthContext();
+  const { createUser, updateUser, changePassword } = useAuthContext();
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -125,25 +168,34 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
 
   const { roles, isLoading } = useSelector((state) => state.role);
 
-  const GRANT_OPTIONS = [
-    { value: 1, label: 'Super Admin' },
-    { value: 2, label: 'Supervisor' },
-    { value: 3, label: 'Employee' },
-    { value: 4, label: 'Client' }
-  ];
+  // const GRANT_OPTIONS = [
+  //   { value: 1, label: 'Super Admin' },
+  //   { value: 2, label: 'Supervisor' },
+  //   { value: 3, label: 'Employee' },
+  //   { value: 4, label: 'Client' }
+  // ];
 
   // ** States
-  // const [passwordValues, setPasswordValues] = useState<State>({
-  //   password: '',
-  //   password2: '',
-  //   showPassword: false,
-  //   showPassword2: false
-  // })
+  const [passwordValues, setPasswordValues] = useState<State>({
+    currentPassword: '',
+    newPassword: '',
+    password2: '',
+    showPassword: false,
+    showCurrentPassword: false,
+    showNewPassword: false,
+    showPassword2: false
+  })
+
+  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+  }
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const defaultValues = useMemo(
   () => ({
     username: currentUser?.username || '',
-    password: currentUser?.password || '',
+    password: '',
     email: currentUser?.email || '',
     phone: currentUser?.phone || '',
     fullname: currentUser?.fullname || '',
@@ -190,6 +242,17 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
 
   const values = watch();
 
+  const ChangePasswordSchema = Yup.object().shape({
+    currentPassword: Yup.string().required('Current Password is required'),
+    newPassword: Yup.string().required('New Password is required'),
+    password2: Yup.string().required('Confirm Password is required'),
+  });
+
+  const passwordMethods = useForm<PasswordValuesProps>({
+    resolver: yupResolver(ChangePasswordSchema),
+    defaultValues,
+  });
+
   useEffect(() => {
     dispatch(fetchRolesData());
   }, [dispatch]);
@@ -211,26 +274,37 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
       setTableData(roles);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEdit, currentUser, isSubmitSuccessful, dispatch, navigate]);
+  }, [isEdit, currentUser, roles, isSubmitSuccessful, dispatch, navigate]);
 
-  // Handle Password
-  // const handlePasswordChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-  //   setPasswordValues({ ...passwordValues, [prop]: event.target.value })
-  // }
-  // const handleClickShowPassword = () => {
-  //   setPasswordValues({ ...passwordValues, showPassword: !passwordValues.showPassword })
-  // }
-  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
+  // Handle Current Password
+  const handleCurrentPasswordChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
+    setPasswordValues({ ...passwordValues, [prop]: event.target.value })
+  }
+  const handleClickShowCurrentPassword = () => {
+    setPasswordValues({ ...passwordValues, showCurrentPassword: !passwordValues.showCurrentPassword })
+  }
+  const handleMouseDownCurrentPassword = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+  }
+
+  // Handle New Password
+  const handleNewPasswordChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
+    setPasswordValues({ ...passwordValues, [prop]: event.target.value })
+  }
+  const handleClickShowNewPassword = () => {
+    setPasswordValues({ ...passwordValues, showNewPassword: !passwordValues.showNewPassword })
+  }
+  const handleMouseDownNewPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
   }
 
   // Handle Confirm Password
-  // const handleConfirmChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-  //   setPasswordValues({ ...passwordValues, [prop]: event.target.value })
-  // }
-  // const handleClickShowConfirmPassword = () => {
-  //   setPasswordValues({ ...passwordValues, showPassword2: !passwordValues.showPassword2 })
-  // }
+  const handleConfirmChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
+    setPasswordValues({ ...passwordValues, [prop]: event.target.value })
+  }
+  const handleClickShowConfirmPassword = () => {
+    setPasswordValues({ ...passwordValues, showPassword2: !passwordValues.showPassword2 })
+  }
   const handleMouseDownConfirmPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
   }
@@ -253,20 +327,21 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     try {
 
     if(!isEdit) {
-      const isSuccess = await createUser( data.fullname, data.email, data.phone, data.username, data.password, data.isSuperUser, data.isVerified, data.company, data.avatarUrl, data.status);
+      const isSuccess = await createUser( data.username, data.password, data.email, data.phone, data.fullname, data.isSuperUser, data.isVerified, data.company, data.avatarUrl, selected, data.status);
       
       if (isSuccess) {
         navigate(PATH_DASHBOARD.user.root)
       }
     }
 
-    const isSuccess = await updateUser( id, data.fullname, data.email, data.phone, data.username, data.isSuperUser, data.isVerified, data.company, data.avatarUrl, selected, data.status);
+    if(isEdit && currentUser) {
+      const isSuccess = await updateUser( id, data.fullname, data.email, data.phone, data.username, data.isSuperUser, data.isVerified, data.company, data.avatarUrl, selected, data.status);
       
-    if (isSuccess) {
-      navigate(PATH_DASHBOARD.user.root)
+      if (isSuccess) {
+        navigate(PATH_DASHBOARD.user.root)
+      }
     }
 
-      // console.log('DATA', data);
     } catch (error) {
       reset();
       setError('afterSubmit', {
@@ -275,6 +350,25 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
       });
     }
   };
+
+  const onSubmitPassword = async (data: PasswordValuesProps) => {
+    try {
+      const isSuccess = await changePassword( id, data.currentPassword, data.newPassword);
+
+      if (isSuccess) {
+        setError('afterSubmit', {
+          message: 'Update password failed',
+        });
+      }
+      navigate(PATH_DASHBOARD.user.root)
+    } catch (error) {
+      reset();
+      setError('afterSubmit', {
+        ...error,
+        message: error.message,
+      });
+    }
+  }
 
   const handleDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -313,7 +407,36 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     <Card>
       <CardHeader title={!isEdit ? 'Create User' : 'Edit User'} titleTypographyProps={{ variant: 'h6' }} />
       <Divider sx={{ margin: 0 }} />
-      <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+      <TabContext value={tabValue}>
+        <TabList
+          onChange={handleChange}
+          aria-label='account-settings tabs'
+          sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
+        >
+          <Tab
+            value='account'
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <AccountOutline />
+                <TabName>Account</TabName>
+              </Box>
+            }
+          />
+          {isEdit && (
+          <Tab
+            value='security'
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <LockOpenOutline />
+                <TabName>Security</TabName>
+              </Box>
+            }
+          />
+          )}
+        </TabList>
+
+        <TabPanel sx={{ p: 0 }} value='account'>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
         {!!errors.afterSubmit && <Alert severity="error">{errors.afterSubmit.message}</Alert>}
 
         <CardContent>
@@ -423,71 +546,6 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
                 <RHFTextField name="username" label='User Name' placeholder='carterLeonard' />
                 <RHFTextField name="email" type='email' label='Email' placeholder='carterleonard@gmail.com' />
 
-              <RHFTextField
-                name="password"
-                label="Password"
-                type="password"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        edge='end'
-                        // onClick={handleClickShowPassword}
-                        onMouseDown={handleMouseDownPassword}
-                        aria-label='toggle password visibility'
-                      >
-                        <EyeOutline fontSize='small' />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              {/*<FormControl fullWidth>*/}
-              {/*  <InputLabel htmlFor='password'>Password</InputLabel>*/}
-              {/*  <OutlinedInput*/}
-              {/*    label='Password'*/}
-              {/*    value={passwordValues.password}*/}
-              {/*    id='password'*/}
-              {/*    onChange={handlePasswordChange('password')}*/}
-              {/*    type={passwordValues.showPassword ? 'text' : 'password'}*/}
-              {/*    endAdornment={*/}
-              {/*      <InputAdornment position='end'>*/}
-              {/*        <IconButton*/}
-              {/*          edge='end'*/}
-              {/*          onClick={handleClickShowPassword}*/}
-              {/*          onMouseDown={handleMouseDownPassword}*/}
-              {/*          aria-label='toggle password visibility'*/}
-              {/*        >*/}
-              {/*          {passwordValues.showPassword ? <EyeOutline /> : <EyeOffOutline />}*/}
-              {/*        </IconButton>*/}
-              {/*      </InputAdornment>*/}
-              {/*    }*/}
-              {/*  />*/}
-              {/*</FormControl>*/}
-
-              {/*<FormControl fullWidth>*/}
-              {/*  <InputLabel htmlFor='password-2'>Confirm Password</InputLabel>*/}
-              {/*  <OutlinedInput*/}
-              {/*    value={passwordValues.password2}*/}
-              {/*    label='Confirm Password'*/}
-              {/*    id='password-2'*/}
-              {/*    onChange={handleConfirmChange('password2')}*/}
-              {/*    type={passwordValues.showPassword2 ? 'text' : 'password'}*/}
-              {/*    endAdornment={*/}
-              {/*      <InputAdornment position='end'>*/}
-              {/*        <IconButton*/}
-              {/*          edge='end'*/}
-              {/*          aria-label='toggle password visibility'*/}
-              {/*          onClick={handleClickShowConfirmPassword}*/}
-              {/*          onMouseDown={handleMouseDownConfirmPassword}*/}
-              {/*        >*/}
-              {/*          {passwordValues.showPassword2 ? <EyeOutline /> : <EyeOffOutline />}*/}
-              {/*        </IconButton>*/}
-              {/*      </InputAdornment>*/}
-              {/*    }*/}
-              {/*  />*/}
-              {/*</FormControl>*/}
-
             </Box>
 
             <Grid item xs={12} md={4}>
@@ -553,6 +611,22 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
                   <MenuItem value='1'>Active</MenuItem>
                 </Select>
               </FormControl>
+
+              {!isEdit && (
+                <RHFTextField
+                name="password"
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} onMouseDown={handleMouseDownPassword} edge="end">
+                          {showPassword ? <EyeOutline fontSize='small' /> : <EyeOffOutline fontSize='small' />}
+                        </IconButton>
+                      </InputAdornment>
+                      ),
+                    }}/>
+            )}
             </Box>
         </Card>
         </Grid>
@@ -640,6 +714,153 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
           </Button>
         </CardActions>
       </FormProvider>
+        </TabPanel>
+
+        {isEdit && (
+        <TabPanel sx={{ p: 0 }} value='security'>
+          <FormProvider methods={methods} onSubmit={handleSubmit(onSubmitPassword)}>
+          {!!errors.afterSubmit && <Alert severity="error">{errors.afterSubmit.message}</Alert>}
+            <CardContent>
+              <Grid item xs={12}>
+                <Card sx={{ pt: 10, pb: 5, px: 3 }}>
+                  <Box
+                    rowGap={2}
+                    columnGap={2}
+                    display="grid"
+                    gridTemplateColumns={{
+                      xs: 'repeat(1, 1fr)',
+                      sm: 'repeat(2, 1fr)',
+                    }}
+                  >
+                    <Typography variant='body2' sx={{ fontWeight: 600 }}>
+                      2. Change Password
+                    </Typography>
+                    <Grid item xs={12} md={4}></Grid>
+
+                    <RHFTextField
+                    name="currentPassword"
+                    label="Current Password"
+                    type={passwordValues.showCurrentPassword ? 'text' : 'password'}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                        edge='end'
+                        onClick={handleClickShowCurrentPassword}
+                        onMouseDown={handleMouseDownCurrentPassword}
+                        aria-label='toggle password visibility'
+                      >
+                        <EyeOutline fontSize='small' />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}/>
+
+                
+                <Grid item xs={12} md={4}></Grid>
+                <RHFTextField
+                    name="newPassword"
+                    label="New Password"
+                    type={passwordValues.showNewPassword ? 'text' : 'password'}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                        edge='end'
+                        onClick={handleClickShowNewPassword}
+                        onMouseDown={handleMouseDownNewPassword}
+                        aria-label='toggle password visibility'
+                      >
+                        <EyeOutline fontSize='small' />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}/>
+                
+                <RHFTextField
+                    name="password2"
+                    label="Confirm Password"
+                    type={passwordValues.showPassword2 ? 'text' : 'password'}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                        edge='end'
+                        onClick={handleClickShowConfirmPassword}
+                        onMouseDown={handleMouseDownConfirmPassword}
+                        aria-label='toggle password visibility'
+                      >
+                        <EyeOutline fontSize='small' />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}/>
+
+                  {/* <FormControl fullWidth>
+                    <InputLabel htmlFor='new-password'>New Password</InputLabel>
+                    <OutlinedInput
+                    label='New Password'
+                    id='newPassword'
+                    name='newPassword'
+                    onChange={handleNewPasswordChange('newPassword')}
+                    type={passwordValues.showNewPassword ? 'text' : 'password'}
+                    endAdornment={
+                    <InputAdornment position='end'>
+                      <IconButton
+                        edge='end'
+                        onClick={handleClickShowNewPassword}
+                        onMouseDown={handleMouseDownNewPassword}
+                        aria-label='toggle password visibility'>
+                        {passwordValues.showNewPassword ? <EyeOutline /> : <EyeOffOutline />}
+                      </IconButton>
+                    </InputAdornment>
+                    }/>
+                  </FormControl> */}
+                
+                {/* <FormControl fullWidth>
+                  <InputLabel htmlFor='password-2'>Confirm Password</InputLabel>
+                  <OutlinedInput
+                  label='Confirm Password'
+                  id='password-2'
+                  name='password2'
+                  onChange={handleConfirmChange('password2')}
+                  type={passwordValues.showPassword2 ? 'text' : 'password'}
+                  endAdornment={
+                    <InputAdornment position='end'>
+                      <IconButton
+                        edge='end'
+                        aria-label='toggle password visibility'
+                        onClick={handleClickShowConfirmPassword}
+                        onMouseDown={handleMouseDownConfirmPassword}
+                      >
+                        {passwordValues.showPassword2 ? <EyeOutline /> : <EyeOffOutline />}
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+                </FormControl> */}
+                </Box>
+                </Card>
+                </Grid>
+            </CardContent>
+          <Divider sx={{ margin: 0 }} />
+        <CardActions>
+        <Stack alignItems="flex-end" sx={{ mr: 2 }}>
+          <LoadingButton size='large' type="submit" variant="contained" loading={isSubmitting}>
+            {'Change Password'}
+          </LoadingButton>
+        </Stack>
+          {/* <Button size='large' type='submit' sx={{ mr: 2 }} variant='contained'>
+            Submit
+          </Button> */}
+          <Button size='large' color='secondary' variant='outlined' href="/pages/user">
+            Cancel
+          </Button>
+        </CardActions>
+        </FormProvider>
+        </TabPanel>
+        )}
+      </TabContext>
     </Card>
     </Grid>
     </Grid>

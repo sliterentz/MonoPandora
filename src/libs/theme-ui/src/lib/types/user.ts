@@ -14,10 +14,10 @@ export type IUserAccountGeneral = {
     roles: number[];
   };
 
-  interface UserState {
-    currentUser: IUserAccountGeneral | null;
-    loading: boolean;
-    error: Error | null;
+  export interface IResponse {
+    code: number;
+    message: string;
+    data: IUserAccountGeneral;
   }
 
 export type IUserCompanyList = {

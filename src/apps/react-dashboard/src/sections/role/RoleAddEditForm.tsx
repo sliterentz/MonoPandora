@@ -163,14 +163,6 @@ const RoleAddEditForm = ({ isEdit = false, currentRole }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, currentRole, permissions, isSubmitSuccessful, navigate]);
 
-  const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-  }
-
-  const handleMouseDownConfirmPassword = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-  }
-
   const onSubmit = async (data: FormValuesProps) => {
     try {
       let isSuccess = null;

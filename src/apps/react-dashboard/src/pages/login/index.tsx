@@ -88,22 +88,22 @@ const LoginPage = () => {
   const dispatch = useDispatch();
 
   // ** State
-  const [values, setValues] = useState<State>({
-    password: '',
-    showPassword: false
-  })
+  // const [values, setValues] = useState<State>({
+  //   password: '',
+  //   showPassword: false
+  // })
 
   // ** Hook
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const handleChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
-    setValues({ ...values, [prop]: event.target.value })
-  }
+  // const handleChange = (prop: keyof State) => (event: ChangeEvent<HTMLInputElement>) => {
+  //   setValues({ ...values, [prop]: event.target.value })
+  // }
 
-  const handleClickShowPassword = () => {
-    setValues({ ...values, showPassword: !values.showPassword })
-  }
+  // const handleClickShowPassword = () => {
+  //   setValues({ ...values, showPassword: !values.showPassword })
+  // }
 
   const handleMouseDownPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
@@ -128,20 +128,22 @@ const LoginPage = () => {
 
   const {
     reset,
+    watch,
     setError,
     handleSubmit,
     formState: { errors, isSubmitting, isSubmitSuccessful },
   } = methods;
 
+  const values = watch();
+
   const onSubmit = async (data: FormValuesProps) => {
     try {
       await login(data.email, data.password);
     } catch (error) {
-      console.error(error);
       reset();
       setError('afterSubmit', {
         ...error,
-        message: error.message,
+        message: 'Invalid email or password',
       });
     }
   };
@@ -184,27 +186,20 @@ const LoginPage = () => {
 
             <RHFTextField name="email" autoFocus fullWidth id='email' label='Email' sx={{ marginBottom: 4 }} />
             <RHFTextField
-          name="password"
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  edge='end'
-                  onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                  aria-label='toggle password visibility'
-                >
-                  {values.showPassword ? <EyeOutline fontSize='small' /> : <EyeOffOutline fontSize='small' />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-            <Box
-              sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
-            >
+            name="password"
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={() => setShowPassword(!showPassword)} onMouseDown={handleMouseDownPassword} edge="end">
+                      {showPassword ? <EyeOutline fontSize='small' /> : <EyeOffOutline fontSize='small' />}
+                    </IconButton>
+                  </InputAdornment>
+                  ),
+                }}/>
+
+            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
               <FormControlLabel control={<Checkbox />} label='Remember Me' />
                 <LinkStyled to='/' onClick={e => e.preventDefault()}>Forgot Password?</LinkStyled>
             </Box>
@@ -215,7 +210,6 @@ const LoginPage = () => {
               variant='contained'
               loading={isSubmitSuccessful || isSubmitting}
               sx={{ marginBottom: 7 }}
-              // onClick={() => navigate('/')}
             >
               Login
             </LoadingButton>
