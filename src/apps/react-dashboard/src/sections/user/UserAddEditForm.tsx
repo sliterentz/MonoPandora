@@ -158,22 +158,12 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
 
   const dispatch = useDispatch();
 
-  // const [roleIds, setRoleIds] = useState<number[]>([]);
-  // const [roles, setRoles] = useState<number[]>([]);
-
   const [filterName, setFilterName] = useState('');
   const [filterStatus, setFilterStatus] = useState(10);
 
   const [tableData, setTableData] = useState<IRoleGeneral[]>([]);
 
   const { roles, isLoading } = useSelector((state) => state.role);
-
-  // const GRANT_OPTIONS = [
-  //   { value: 1, label: 'Super Admin' },
-  //   { value: 2, label: 'Supervisor' },
-  //   { value: 3, label: 'Employee' },
-  //   { value: 4, label: 'Client' }
-  // ];
 
   // ** States
   const [passwordValues, setPasswordValues] = useState<State>({
@@ -248,11 +238,6 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
     password2: Yup.string().required('Confirm Password is required'),
   });
 
-  const passwordMethods = useForm<PasswordValuesProps>({
-    resolver: yupResolver(ChangePasswordSchema),
-    defaultValues,
-  });
-
   useEffect(() => {
     dispatch(fetchRolesData());
   }, [dispatch]);
@@ -308,20 +293,6 @@ const UserAddEditForm = ({ isEdit = false, currentUser }: Props) => {
   const handleMouseDownConfirmPassword = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()
   }
-
-  // const handleChange = (event: SelectChangeEvent<typeof roleIds>) => {
-  //   const {
-  //     target: { value },
-  //   } = event;
-  //   setRoleIds(
-  //     // On autofill we get a stringified value.
-  //     typeof value === 'string' ? value.split(',').map(Number) : value,
-  //   );
-  //   setRoles(
-  //     // On autofill we get a stringified value.
-  //     typeof value === 'string' ? value.split(',').map(Number) : value,
-  //   );
-  // };
 
   const onSubmit = async (data: FormValuesProps) => {
     try {

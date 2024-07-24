@@ -147,8 +147,8 @@ const RegisterPage = () => {
     email: '',
     phone: '',
     username: '',
-    password: '1q2W3E4r',
-    passwordConfirm: '1q2W3E4r',
+    password: '',
+    passwordConfirm: '',
     afterSubmit: '',
   };
 
