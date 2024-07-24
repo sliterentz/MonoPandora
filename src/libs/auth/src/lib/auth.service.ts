@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Inject, HttpException, HttpStatus, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
 import * as bcrypt from "bcrypt";
@@ -84,7 +84,6 @@ export class AuthService {
       };
 
       return result.code(500).type('application/json').send(response);
-      // return new HttpException('Internal Error in Registration', HttpStatus.INTERNAL_SERVER_ERROR)
     }
   }
 
@@ -103,22 +102,10 @@ export class AuthService {
 
   async verifyAccount(code: VerifyConfirmDTO, result: FastifyReply): Promise<any> {
     try {
-      // const user = await this.userRepo.findOne({ where: {
-      //   authConfirmToken: code.authConfirmToken
-      // }});
-      // if (!user) {
-      //   return new HttpException('Verification code has expired or not found', HttpStatus.UNAUTHORIZED)
-      // }
-      // await this.userRepo.update({ email: user.email }, { isVerrified: true, authConfirmToken: code.authConfirmToken })
       // await this.sendConfirmedEmail(user)
 
       await this.userService.generateUserToken(code);
       const isSuccess = await this.userService.verifyUser(code);
-
-      // let response = new Response('application/json', {
-      //   statusText: 'Successfull activating',
-      //   status: 200
-      // });
 
       let response = {
         message: 'Successfull activating',
@@ -127,12 +114,6 @@ export class AuthService {
       };
 
       if (isSuccess) {
-        // await this.userService.generateUserToken(code);
-        // response = new Response('application/json', {
-        //   statusText: 'User allready activated',
-        //   status: 400
-        // });
-
         return result.code(200).type('application/json').send(response);
       }
 
@@ -142,11 +123,9 @@ export class AuthService {
         data: false
       };
 
-      // throw new BadRequestException('Failed to verified', { cause: new Error(), description: 'User allready verified' });
       return result.code(400).type('application/json').send(response);
 
     } catch (error) {
-      // throw new BadRequestException('Internal Error', { cause: new Error(), description: 'Internal Error' });
       let response = {
         message: 'Internal error exception',
         code: 500,
@@ -154,15 +133,20 @@ export class AuthService {
       };
 
       return result.code(500).type('application/json').send(response);
-      // return new HttpException('Internal error exception', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async signin(user: User): Promise<any> {
+  async signin(user: User, result: FastifyReply): Promise<any> {
       // Profile
       this.logger.startProfile('signin');
     try {
       const validateLogin = await this.userService.signin(user);
+
+      let response = {
+        message: 'Successfull login',
+        code: 200,
+        data: []
+      };
 
       if (!validateLogin) {
         // Fatal
@@ -172,10 +156,22 @@ export class AuthService {
           },
           error: new Error('Unauthorize request'),
         });
-        return new HttpException('Incorrect username or password', HttpStatus.UNAUTHORIZED)
+        response = {
+          message: 'User allready activated',
+          code: 400,
+          data: []
+        };
+  
+        return result.code(400).type('application/json').send(response);
       } 
     
-      return validateLogin;
+      response = {
+        message: 'Successfull login',
+        code: 200,
+        data: validateLogin
+      };
+
+      return result.code(200).type('application/json').send(response);
     } catch (error) {
       // Error
       this.logger.error('Incorrect username or password', {
@@ -184,18 +180,20 @@ export class AuthService {
         },
         error: new Error('Unauthorize request'),
       });
-      // throw new BaseError({ name: 'EXCEPTIONAL_ERROR', message: 'Internal error exception', cause: HttpStatus.INTERNAL_SERVER_ERROR });
-      return new HttpException('Internal error exception', HttpStatus.INTERNAL_SERVER_ERROR);
+
+      let response = {
+        message: 'Internal error exception',
+        code: 500,
+        data: false
+      };
+
+      return result.code(500).type('application/json').send(response);
     }
   }
 
   async validateUser(payload: JwtPayloadInterface): Promise<User | null> {
     return await this.userService.findById(payload.id);
   }
-
-  // async validateToken(payload: JwtPayloadInterface): Promise<RefreshToken | null> {
-  //   return await this.refreshTokenRepo.findOne({ where: { userId: payload.id }});
-  // }
 
   async authenticate(payload: AuthModel): Promise<any> {
     const user = await this.userService.findByEmailWithPassword(payload.email);
@@ -219,7 +217,7 @@ export class AuthService {
     };
   }
 
-  async isValidToken(token: FastifyRequest, user: User): Promise<any> {
+  async isValidToken(token: FastifyRequest, result: FastifyReply): Promise<any> {
     try {
 
       let accessToken = '';
@@ -232,70 +230,74 @@ export class AuthService {
         secret: process.env['JWT_SECRET']
       });
 
+      let response = {
+        message: 'Successfull',
+        code: 200,
+        data: [{}]
+      };
+
       if(!hasValidAccess) {
-        throw new UnauthorizedException('Invalid credentials');
+
+        // Fatal
+        this.logger.fatal('Unauthorized access', {
+          props: {
+            request_ip: `"${token.ip}"`,
+          },
+          error: new Error('Unauthorized access, Invalid credentials'),
+        });
+        response = {
+          message: 'Invalid credentials',
+          code: 401,
+          data: []
+        };
+  
+        return result.code(401).type('application/json').send(response);
       }
 
       const userData = await this.userService.findById(hasValidAccess.id);
 
       if (!userData) {
-        throw new BadRequestException('No user exist');
+
+        // Fatal
+        this.logger.fatal('Bad request', {
+          props: {
+            request_ip: `"${token.ip}"`,
+          },
+          error: new Error('Bad request, No user existed'),
+        });
+        response = {
+          message: 'User not existed',
+          code: 404,
+          data: []
+        };
+  
+        return result.code(404).type('application/json').send(response);
       }
+
+      console.log(userData);
 
       const userProfile = {
         'name' : userData.fullname,
         'email': userData.email,
       }
 
+      response = {
+        message: 'Success',
+        code: 200,
+        data: [userProfile]
+      };
+
       //
-      return userProfile;
+      return result.code(200).type('application/json').send(response);
 
     } catch(error) {
-      // throw new BaseError({ name: 'UNAUTHORIZED_ERROR', message: 'Unauthorize access', cause: HttpStatus.UNAUTHORIZED });
-      throw new UnauthorizedException('Unauthorize access');
+      let response = {
+        message: 'Internal error exception',
+        code: 500,
+        data: []
+      };
+
+      return result.code(500).type('application/json').send(response);
     }
   }
-
-  // generateJWT(payload: IRefreshToken, config: IJwtConfig) {
-  //   return this.jwtService.sign(payload, {
-  //     secret: config.secret,
-  //     expiresIn: config.expiresIn,
-  //   });
-  // }
-
-  // async getRefreshToken(user: User, dto: RefreshTokenDTO): Promise<any> {
-  //   try {
-  //     const tokenSegmen = dto['rawHeaders'][3].split(" ");
-  //     const accessToken = tokenSegmen[1];
-  
-  //     const hasValidAccess = await this.jwtService.verifyAsync(accessToken, {
-  //       secret: process.env['JWT_SECRET']
-  //     });
-  
-  //     if (!hasValidAccess) {
-  //       throw new UnauthorizedException('Invalid credentials');
-  //     }
-  
-  //     const validToken = await this.refreshTokenRepo.findOne({ where: { userId: dto.id }});
-  
-  //     if (!validToken) {
-  //       throw new BadRequestException();
-  //     }
-  
-  //     const payload: IRefreshToken = {
-  //       userId: user.id,
-  //       token: validToken.token,
-  //     }
-  
-  //     const newToken = await this.generateJWT(payload, accessTokenConfig());
-  
-  //     return {
-  //       accessToken: newToken,
-  //     };
-  
-  //   } catch (error) {
-  
-  //   }
-  
-  // }
 }

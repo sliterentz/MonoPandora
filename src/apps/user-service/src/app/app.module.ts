@@ -25,7 +25,7 @@ import { UserRepository } from '@auth-lib';
         return {
           secret: configService.get<string>('JWT_SECRET'),
           signOptions: {
-            expiresIn: configService.get<string | number>('JWT_EXPIRES_IN'),
+            expiresIn: configService.get<string | number>('ACCESS_JWT_EXPIRES_IN'),
           },
         };
       },

@@ -16,9 +16,10 @@ export enum RegisMethod {
 }
 
 export enum IGrant {
-    ADMIN = 0,
-    USER = 1,
-    CUSTOMER = 2,
+    SUPERADMIN = 0,
+    SUPERVISOR = 1,
+    EMPLOYEE = 2,
+    CLIENT = 3,
 }
 
 export interface IRegisterUserForm {

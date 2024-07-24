@@ -1,0 +1,28 @@
+// ----------------------------------------------------------------------
+
+export const role = [
+  'super admin',
+  'supervisor',
+  'client',
+  'supervisor',
+  'client',
+  'supervisor',
+  'client',
+  'supervisor',
+  'client',
+  'client',
+  'employee',
+  'client',
+  'employee',
+  'client',
+  'employee',
+  'client',
+  'employee',
+  'client',
+  'employee',
+  'client',
+  'employee',
+  'employee',
+  'client',
+  'client',
+];

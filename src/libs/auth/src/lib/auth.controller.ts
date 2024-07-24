@@ -6,7 +6,7 @@ import { UserEntity as User } from "./entities";
 import { IAccessToken, IAuthConfirmToken, IRegisterUserForm } from "./types";
 import { Public } from './decorators/public.decorator';
 import { JwtStrategy } from './strategy/jwt.strategy'
-import { GetUser } from './decorators/user.decorator'
+// import { GetUser } from './decorators/user.decorator'
 // import { RefreshTokenStrategy } from './strategy/refresh-token.strategy';
 // import { RefreshTokenDTO } from './dtos/refresh-token.dto';
 import { TransactionInterceptor } from './interceptors/transaction.interceptor';
@@ -27,8 +27,8 @@ export class AuthController {
 
   @UseInterceptors(ResponseInterceptor)
   @Post('/signin')
-  async signin(@Body() user: User) {
-    return await this.authService.signin(user);
+  async signin(@Body() user: User, @Res() res: FastifyReply) {
+    return await this.authService.signin(user, res);
   }
 
   @UseInterceptors(ResponseInterceptor)
@@ -38,9 +38,10 @@ export class AuthController {
   }
 
   @UseGuards(JwtStrategy)
+  @UseInterceptors(ResponseInterceptor)
   @Get('/profile')
-  async getProfile(@Request() req: FastifyRequest, @GetUser() user: User) {
-    return await this.authService.isValidToken(req, user);
+  async getProfile(@Request() req: FastifyRequest, @Res() res: FastifyReply) {
+    return await this.authService.isValidToken(req, res);
   }
 
   // @UseGuards(RefreshTokenStrategy)

@@ -17,9 +17,10 @@
     "paths": {
       "@auth-lib": ["libs/auth/src/index.ts"],
       "@loggma-lib": ["libs/loggma/src/index.ts"],
-      "@ui-lib": ["libs/packages/ui/src/index.ts"],
       "@nestjs-logger/shared": ["libs/loggma/src"],
-      "@nestjs-logger/shared/*": ["libs/loggma/src/*"]
+      "@nestjs-logger/shared/*": ["libs/loggma/src/*"],
+      "@theme-ui": ["libs/theme-ui/src/index.ts"],
+      "@ui-lib": ["libs/packages/ui/src/index.ts"]
     },
     "outDir": "./dist"
   },

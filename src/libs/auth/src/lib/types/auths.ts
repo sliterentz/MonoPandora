@@ -28,5 +28,5 @@ export const accessTokenConfig = (): IJwtConfig => ({
 
 export const refreshTokenConfig = (): IJwtConfig => ({
   secret: process.env.REFRESH_TOKEN_SECRET,
-  expiresIn: '60d',
+  expiresIn: '7d',
 });
