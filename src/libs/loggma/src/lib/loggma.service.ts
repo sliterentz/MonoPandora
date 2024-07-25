@@ -1,4 +1,4 @@
-import { createLogger, format, transports } from 'winston';
+// import { format } from 'winston';
 import { Inject, Injectable, Scope } from '@nestjs/common';
 import { INQUIRER } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
@@ -8,56 +8,59 @@ import ContextStorageInterface, { ContextStorageInterfaceKey } from './interface
 import * as fs from 'fs';
 import path from 'path';
 import moment from 'moment-timezone';
-import 'dotenv/config'
+import * as dotenv from 'dotenv'
 
-const { combine, timestamp, label, printf } = format;
+dotenv.config();
 
-const myFormat = printf(({ level, message, label, timestamp }) => {
-    return `${timestamp} ${label} [${level}]: ${message}`;
-});
+// const { combine, timestamp, label, printf } = format;
+
+// const myFormat = printf(({ level, message, label, timestamp }) => {
+//     return `${timestamp} ${label} [${level}]: ${message}`;
+// });
 
 moment.tz.setDefault("Asia/Jakarta");
-const today = moment();
-const fileFormat = today.format('YYYY-MM-DD');
-const timeFormat = today.format('YYYY-MM-DD HH:MM:SS');
+// const today = moment();
+// const fileFormat = today.format('YYYY-MM-DD');
+// const timeFormat = today.format('YYYY-MM-DD HH:MM:SS');
 
 // create log file if not exist
-const logDirectory = path.join(__dirname, process.env.LOG_DIR_NAME);
+const logDirPath = process.env.LOG_DIR_NAME || '/logs';
+const logDirectory = path.join(__dirname, logDirPath);
 if (!fs.existsSync(logDirectory)) {
     fs.mkdirSync(logDirectory);
 }
 
-const myCustomLevels = {
-    levels: {
-        error: 0,
-        warning: 1,
-        info: 2,
-        verbose: 3,
-        debug: 4,
-        silly: 5,
-        http: 6
-    },
-    colors: {
-        error: 'red',
-        warning: 'yellow',
-        info: 'green',
-        verbose: 'purple',
-        debug: 'blue',
-        silly: 'grey',
-        http: 'orange'
-    }
-};
+// const myCustomLevels = {
+//     levels: {
+//         error: 0,
+//         warning: 1,
+//         info: 2,
+//         verbose: 3,
+//         debug: 4,
+//         silly: 5,
+//         http: 6
+//     },
+//     colors: {
+//         error: 'red',
+//         warning: 'yellow',
+//         info: 'green',
+//         verbose: 'purple',
+//         debug: 'blue',
+//         silly: 'grey',
+//         http: 'orange'
+//     }
+// };
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class LoggmaService implements Logger {
-  private sourceClass: string;
-  private organization: string;
-  private context: string;
-  private app: string;
+  private organization: string = 'NextLevelGeek';
+  private context: string = 'MonoPandoApp';
+  private app: string = 'services';
+  private sourceClass: string = 'defaultSourceClass';
 
     constructor(
       @Inject(LoggerBaseKey) private logger: Logger,
-      configService: ConfigService,
+      private configService: ConfigService,
       @Inject(INQUIRER) parentClass: object,
       @Inject(ContextStorageInterfaceKey)
       private contextStorageService: ContextStorageInterface
@@ -66,9 +69,9 @@ export class LoggmaService implements Logger {
       this.sourceClass = parentClass?.constructor?.name;
 
       // Set the organization, context and app from the environment variables
-      this.organization = configService.get<string>('ORGANIZATION');
-      this.context = configService.get<string>('CONTEXT');
-      this.app = configService.get<string>('APP');
+      this.organization = this.configService.get<string>('ORGANIZATION') ?? 'NextLevelGeek';
+      this.context = this.configService.get<string>('CONTEXT') ?? 'MonoPandoApp';
+      this.app = this.configService.get<string>('APP') ?? 'services';
     }
 
   public log(

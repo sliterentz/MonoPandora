@@ -1,4 +1,4 @@
-import { Global, Inject, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { LoggmaService } from './loggma.service';
 import Logger, {
   LoggerBaseKey,
@@ -10,7 +10,7 @@ import SlackTransport from '@nestjs-logger/shared/lib/transport/slackTransport';
 import LoggmaServiceAdapter from '@nestjs-logger/shared/lib/loggmaService-adapter';
 import { ConfigLoggmaService } from '@nestjs-logger/shared/config/config-loggma.service';
 import WinstonLogger, { WinstonLoggerTransportsKey } from '@nestjs-logger/shared/lib/transport/winstonLogger';
-import * as morgan from 'morgan';
+// import * as morgan from 'morgan';
 import { LoggmaMorganMiddleware } from '@nestjs-logger/shared/lib/middlewares/loggma-morgan.middleware';
 
 @Global()
@@ -56,9 +56,9 @@ import { LoggmaMorganMiddleware } from '@nestjs-logger/shared/lib/middlewares/lo
 
 export class LoggmaModule implements NestModule {
   constructor(
-    @Inject(LoggerKey)
-    private readonly logger: Logger,
-    private configService: ConfigLoggmaService,
+    // @Inject(LoggerKey)
+    // private readonly logger: Logger,
+    // private configService: ConfigLoggmaService,
   ) {}
 
   public configure(consumer: MiddlewareConsumer) {

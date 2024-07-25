@@ -36,7 +36,7 @@ export default class WinstonLogger implements Logger {
         // Errors will be logged with stack trace
         winston.format.errors({ stack: true }),
         // Add custom Log fields to the log
-        winston.format((info, opts) => {
+        winston.format((info) => {
           // Info contains an Error property
           if (info.error && info.error instanceof Error) {
             info.stack = info.error.stack;
