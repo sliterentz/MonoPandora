@@ -1,19 +1,37 @@
-import { IsString, IsNumber, IsEmail } from "class-validator";
-import { IGrant } from "../types/users";
+import { IsString, IsNumber, IsEmail, IsBoolean } from 'class-validator';
+import { ICreateUserForm, IStatus } from "../types/users";
 
-export class UserModel {
+export class UserModel implements ICreateUserForm {
+  @IsString()
+  fullname!: string;
+
   @IsEmail()
-  email?: string;
+  email!: string;
 
   @IsString()
-  fullname?: string;
+  phone!: string;
 
   @IsString()
-  password?: number;
+  password!: string;
+
+  @IsBoolean()
+  isSuperUser!: Boolean;
 
   @IsNumber()
-  grant?: IGrant;
+  authConfirmToken!: number;
+
+  @IsBoolean()
+  isVerified!: Boolean;
+
+  @IsString()
+  username!: string;
+
+  @IsString()
+  company!: string;
+
+  @IsString()
+  avatarUrl!: string;
 
   @IsNumber()
-  authConfirmToken?: number;
+  status!: IStatus;
 }

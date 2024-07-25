@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from "./auth.service";
+import { TokenService } from './token.service';
 import { JwtStrategy } from "./strategy/jwt.strategy";
 import { RefreshTokenStrategy } from './strategy/refresh-token.strategy';
 import { AuthController } from './auth.controller';
@@ -8,10 +9,13 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+// import { SuperUserGuard } from './guards/super-user.guard';
 import { Reflector } from '@nestjs/core';
 import * as dotenv from 'dotenv';
 import { UserModule } from './user/user.module'
-import { JwtModule, JwtService} from '@nestjs/jwt';
+import { RoleModule } from './role/role.module';
+import { PermissionModule } from './permission/permission.module';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 dotenv.config();
@@ -55,10 +59,12 @@ dotenv.config();
       },
     }),
     UserModule,
+    RoleModule,
+    PermissionModule,
     PassportModule
   ],
   controllers: [AuthController],
-  providers: [JwtStrategy, RefreshTokenStrategy, AuthService, JwtAuthGuard,  Reflector],
-  exports: [AuthService, PassportModule, JwtAuthGuard],
+  providers: [JwtStrategy, RefreshTokenStrategy, AuthService, JwtAuthGuard, Reflector, TokenService],
+  exports: [AuthService, TokenService, PassportModule, JwtAuthGuard ],
 })
 export class AuthModule {}

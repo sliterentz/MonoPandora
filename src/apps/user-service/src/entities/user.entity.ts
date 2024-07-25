@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Unique, OneToMany } from 'typeorm';
+import { BaseEntity, Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { RefreshToken } from './refresh-token.entity';
 
 @Entity('users')
@@ -17,7 +17,7 @@ export class User extends BaseEntity {
   password!: string;
 
   @Column()
-  grant!: number;
+  isSuperUser!: boolean;
 
   @Column()
   authConfirmToken!: number;
@@ -39,7 +39,7 @@ export class User extends BaseEntity {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updatedAt!: Date;
-  
-  @OneToMany((type) => RefreshToken, (refreshToken) => refreshToken.user)
+
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens!: RefreshToken[];
 }

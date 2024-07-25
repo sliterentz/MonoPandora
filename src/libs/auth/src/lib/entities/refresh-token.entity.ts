@@ -30,7 +30,7 @@ export class RefreshTokenEntity {
   })
   updatedAt!: Date;
 
-  @ManyToOne((type) => User, (user) => user.refreshTokens)
+  @ManyToOne(() => User, (user) => user.refreshTokens)
   @JoinColumn({name: 'user_id'})
   user!: User;
 }
