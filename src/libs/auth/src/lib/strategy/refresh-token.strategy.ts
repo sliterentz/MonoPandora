@@ -14,8 +14,8 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refresh-to
     });
   }
 
-  // logJwtSecret() {
-    // const jwtSecret = this.configService.get<string>('JWT_SECRET');
-    // console.log('JWT Secret:', jwtSecret);
-  // }
+  logJwtSecret() {
+    const jwtSecret = this.configService.get<string>('JWT_SECRET');
+    console.log('JWT Secret:', jwtSecret);
+  }
 }

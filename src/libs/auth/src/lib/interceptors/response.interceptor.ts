@@ -45,10 +45,9 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, HttpSuccessRes
             }
     
             const errorResponse: HttpFailResponse = {
-              error: {
-                message: message,
-                code: code,
-              },
+              message: message,
+              code: code,
+              data: [],
             };
 
             return throwError(() => new HttpException(errorResponse, code));
