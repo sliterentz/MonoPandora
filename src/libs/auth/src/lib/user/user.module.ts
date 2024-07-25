@@ -5,10 +5,10 @@ import { JwtService} from '@nestjs/jwt';
 import { UserSchema } from '../schemas/user.schema'
 import { RefreshTokenSchema } from '../schemas/refresh-token.schema';
 import { UserRepository, RefreshTokenRepository } from '../repositories';
-// import { UserEntity as User } from '../entities/user.entity';
+import { UserEntity as User } from '../entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UserSchema, RefreshTokenSchema, UserRepository, RefreshTokenRepository])],
+  imports: [TypeOrmModule.forFeature([UserSchema, RefreshTokenSchema, UserRepository, RefreshTokenRepository, User])],
   controllers: [],
   providers: [UserService, JwtService, UserRepository, RefreshTokenRepository],
   exports: [TypeOrmModule, UserService]

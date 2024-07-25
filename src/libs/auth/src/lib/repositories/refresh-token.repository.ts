@@ -1,10 +1,12 @@
 import { BaseRepository } from './base.repository';
-import { BadRequestException, Inject, Injectable, Scope, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Scope } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
-import { FastifyRequest, FastifyReply } from 'fastify';
+// import { FastifyRequest } from 'fastify';
+import { FastifyWithEntityManagerRequest } from '../interfaces/fastify-withentitymanager-request.interface';
+
 import { DataSource, LessThanOrEqual } from 'typeorm';
 import { RefreshTokenEntity as RefreshToken, UserEntity as User } from '../entities';
-import { RegisterRequestDTO } from '../dtos/register-request.dto';
+// import { RegisterRequestDTO } from '../dtos/register-request.dto';
 import { VerifyConfirmDTO } from '../dtos/verify-confirm.dto';
 import { JwtService } from '@nestjs/jwt';
 import moment from 'moment-timezone';
@@ -13,13 +15,14 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 moment.tz.setDefault("Asia/Jakarta");
-const today = moment();
+// const today = moment();
 
 @Injectable({ scope: Scope.REQUEST })
 export class RefreshTokenRepository extends BaseRepository {
     constructor(
       dataSource: DataSource,
-      @Inject(REQUEST) req: FastifyRequest,
+      @Inject(REQUEST) req: FastifyWithEntityManagerRequest,
+      // @Inject(REQUEST) req: FastifyRequest,
       private jwtService: JwtService,
       @Inject(LoggerKey)
       private logger: Logger
@@ -31,7 +34,7 @@ export class RefreshTokenRepository extends BaseRepository {
       return await this.getRepository(User).findOneOrFail({
         where: {
             authConfirmToken: code,
-            isVerrified: false
+            isVerified: false
         }
       });
     }
@@ -40,7 +43,7 @@ export class RefreshTokenRepository extends BaseRepository {
       return await this.getRepository(User).findOneOrFail({
         where: {
             id: userId,
-            isVerrified: false
+            isVerified: false
         }
       });
     }
