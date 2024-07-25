@@ -10,7 +10,7 @@ import {
   IsBoolean
 } from 'class-validator';
 
-export class RegisterRequestDTO {
+export class CreateUserRequestDTO {
   @IsNotEmpty()
   @IsString()
   @MinLength(3)
@@ -19,6 +19,10 @@ export class RegisterRequestDTO {
   @IsNotEmpty()
   @IsEmail()
   email!: string;
+
+  @IsString()
+  @MinLength(3)
+  phone!: string;
 
   @IsNotEmpty()
   @IsString()
@@ -40,4 +44,21 @@ export class RegisterRequestDTO {
 
   @IsBoolean()
   isVerified!: Boolean;
-}
+
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(3)
+  username!: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @MinLength(3)
+  company!: string;
+
+  @IsString()
+  avatarUrl!: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  status!: number;
+};
