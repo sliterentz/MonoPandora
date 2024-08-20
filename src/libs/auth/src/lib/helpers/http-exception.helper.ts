@@ -1,4 +1,4 @@
-import { ConflictException, UnauthorizedException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ErrorType } from '../types';
 
 export class ForeignKeyConflictException extends ConflictException {
@@ -111,6 +111,15 @@ export class NotFoundUserException extends NotFoundException {
     super({
       errorType: ErrorType.NoUserDataExists,
       message: 'No data user exists',
+    });
+  }
+}
+
+export class InvalidAccessException extends BadRequestException {
+  constructor() {
+    super({
+      errorType: ErrorType.AccessNotGranted,
+      message: 'Invalid input data, access forbidden',
     });
   }
 }

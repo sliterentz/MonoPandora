@@ -13,6 +13,7 @@ export enum ErrorType {
   BlockedUser = 'BLOCKED_USER',
   InactiveUser = 'INACTIVE_USER',
   ForeignKeyConflict = 'FOREIGN_KEY_CONFLICT',
+  AccessNotGranted = 'ACCESS_NOT_GRANTED',
 }
 
 export enum DBErrorCode {

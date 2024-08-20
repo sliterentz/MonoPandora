@@ -13,7 +13,7 @@ import { IVerrifyConfirmForm } from '../types';
 // import { UserDto } from '../dtos/user.dto';
 import { UserUpdateRequestDto, UserResponseDto, UserChangePasswordRequestDto, UserCreateRequestDto } from './dtos';
 import { UserMapper } from './user.mapper';
-import { ForeignKeyConflictException, UserExistsException, EmailExistsException, PhoneExistsException, InvalidCurrentPasswordException } from '../helpers';
+import { ForeignKeyConflictException, UserExistsException, EmailExistsException, PhoneExistsException, InvalidCurrentPasswordException, InvalidAccessException } from '../helpers';
 import { DBErrorCode, DBError } from '../types'
 import { TimeoutError } from 'rxjs';
 import { HashUtilsHelper } from '../helpers';
@@ -273,4 +273,50 @@ export class UserService {
       }
     }
   }
+
+  /**
+   * Create new user
+   * @param userDto {UserCreateRequestDto}
+   * @returns {Promise<UserResponseDto>}
+   */
+    public async registerUser(userDto: UserCreateRequestDto): Promise<UserResponseDto> {
+      try {
+        let userEntity = UserMapper.toCreateEntity(userDto);
+        userEntity.password = await HashUtilsHelper.encrypt(userEntity.password);
+        const roles = await userEntity.roles;
+        // const isValidRole = roles.filter(item => item.id !== 1);
+
+        if (userEntity.isSuperUser || roles.some(role => role.id === 1)) {
+          throw new InvalidAccessException();
+        }
+
+        userEntity = await this.userRepository.save(userEntity);
+        return UserMapper.toDto(userEntity);
+      } catch (error) {
+        const dbError = error as DBError;
+        if (dbError.message?.includes('Invalid input data, access forbidden'))  {
+          throw new InvalidAccessException();
+        }
+        if (dbError.detail?.includes('username')) {
+          throw new UserExistsException(userDto.username);
+        }
+        if (dbError.detail?.includes('email')) {
+          throw new EmailExistsException(userDto.email);
+        }
+        if (dbError.detail?.includes('phone')) {
+          throw new PhoneExistsException(userDto.phone);
+        }
+        if (
+          dbError.code == DBErrorCode.PgForeignKeyConstraintViolation ||
+          dbError.code == DBErrorCode.PgNotNullConstraintViolation
+        ) {
+          throw new ForeignKeyConflictException();
+        }
+        if (error instanceof TimeoutError) {
+          throw new RequestTimeoutException();
+        } else {
+          throw new InternalServerErrorException();
+        }
+      }
+    }
 }

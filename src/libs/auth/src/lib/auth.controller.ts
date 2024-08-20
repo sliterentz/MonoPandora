@@ -32,10 +32,11 @@ export class AuthController {
   constructor(private authService: AuthService, private userService: UserService) {}
 
   @UseInterceptors(ResponseInterceptor)
+  @ApiGlobalResponse(UserResponseDto)
   @Public()
   @Post('/signup')
   async signup(@Body(ValidationPipe) UserDto: UserCreateRequestDto): Promise<UserResponseDto> {
-    return await this.userService.createUser(UserDto);
+    return await this.userService.registerUser(UserDto);
   }
 
   @UseInterceptors(ResponseInterceptor)
