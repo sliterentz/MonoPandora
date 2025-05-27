@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Debug Nx Nest App",
+        // "program": "${workspaceFolder}/apps/user-service/src/main.ts",
+        "runtimeExecutable": "npx",
+        "runtimeArgs": [
+          "nx",
+          "serve",
+          "user-service",
+          "--inspect"
+        ],
+        "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+        "preLaunchTask": "tsc: watch - tsconfig.base.json",
+        "cwd": "${workspaceFolder}/apps/user-service",
+        "autoAttachChildProcesses": true,
+        "restart": true,
+        "sourceMaps": true,
+        "stopOnEntry": false,
+        "console": "integratedTerminal",
+        "outFiles": [
+          "${workspaceFolder}/dist/**/*.ts"
+        ]
+      }
+    ]
+}

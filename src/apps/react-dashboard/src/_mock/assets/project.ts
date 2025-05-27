@@ -1,0 +1,17 @@
+export const project = [
+    { projectName: 'Project One', projectDetail: 'Project detail of Project One', projectLeader: 'Mr. Satu', currentSprint: '10', progressPercentage: '40%', totalTeam: 4 },
+    { projectName: 'Project Two', projectDetail: 'Project detail of Project Two', projectLeader: 'Mr. Dua', currentSprint: '11', progressPercentage: '50%', totalTeam: 4 },
+    { projectName: 'Project Three', projectDetail: 'Project detail of Project Three', projectLeader: 'Mr. Tiga', currentSprint: '12', progressPercentage: '60%', totalTeam: 3 },
+    { projectName: 'Project Four', projectDetail: 'Project detail of Project Four', projectLeader: 'Mr. Empat', currentSprint: '13', progressPercentage: '70%', totalTeam: 6 },
+    { projectName: 'Project Five', projectDetail: 'Project detail of Project Five', projectLeader: 'Mr. Lima', currentSprint: '14', progressPercentage: '80%', totalTeam: 4 },
+    { projectName: 'Project Six', projectDetail: 'Project detail of Project Six', projectLeader: 'Mr. Enam', currentSprint: '15', progressPercentage: '90%', totalTeam: 2 },
+    { projectName: 'Project Seven', projectDetail: 'Project detail of Project Seven', projectLeader: 'Mr. Satu', currentSprint: '10', progressPercentage: '40%', totalTeam: 4 },
+    { projectName: 'Project Eight', projectDetail: 'Project detail of Project Eight', projectLeader: 'Mr. Dua', currentSprint: '11', progressPercentage: '50%', totalTeam: 4 },
+    { projectName: 'Project Nine', projectDetail: 'Project detail of Project Nine', projectLeader: 'Mr. Tiga', currentSprint: '12', progressPercentage: '60%', totalTeam: 3 },
+    { projectName: 'Project Ten', projectDetail: 'Project detail of Project Ten', projectLeader: 'Mr. Empat', currentSprint: '13', progressPercentage: '70%', totalTeam: 6 },
+    { projectName: 'Project Eleven', projectDetail: 'Project detail of Project Eleven', projectLeader: 'Mr. Lima', currentSprint: '14', progressPercentage: '80%', totalTeam: 4 },
+    { projectName: 'Project Twelve', projectDetail: 'Project detail of Project Twelve', projectLeader: 'Mr. Enam', currentSprint: '15', progressPercentage: '90%', totalTeam: 2 },
+    { projectName: 'Project Threeteen', projectDetail: 'Project detail of Project Ten', projectLeader: 'Mr. Empat', currentSprint: '13', progressPercentage: '70%', totalTeam: 6 },
+    { projectName: 'Project Fourteen', projectDetail: 'Project detail of Project Eleven', projectLeader: 'Mr. Lima', currentSprint: '14', progressPercentage: '80%', totalTeam: 4 },
+    { projectName: 'Project Fiveteen', projectDetail: 'Project detail of Project Twelve', projectLeader: 'Mr. Enam', currentSprint: '15', progressPercentage: '90%', totalTeam: 2 },
+  ];
