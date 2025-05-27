@@ -11,7 +11,7 @@ import { VerifyConfirmDTO } from '../dtos/verify-confirm.dto';
 // import { LoginRequestDTO } from '../dtos/login-request.dto';
 import { JwtService } from '@nestjs/jwt';
 import Logger, { LoggerKey } from '@nestjs-logger/shared/lib/interfaces/logger.interface';
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import * as dotenv from 'dotenv';
 
 import { PaginationRequest  } from '../interfaces';

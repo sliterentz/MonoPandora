@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as dotenv from 'dotenv';
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { UserService } from './user/user.service';
 import { UserEntity as User } from './entities';
 import { UserRepository as UserRepo } from './repositories/user.repository';
