@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  labels:
+    app: user-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: localhost:30100/user-service:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: user-service-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: user-service-config
+              key: DB_PORT
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: user-service-secrets
+              key: DB_USER
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: user-service-secrets
+              key: DB_PASS
+        - name: DB_NAME_DEVELOPMENT
+          valueFrom:
+            configMapKeyRef:
+              name: user-service-config
+              key: DB_NAME
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: user-service-secrets
+              key: JWT_SECRET
+        - name: ACCESS_JWT_EXPIRES_IN
+          valueFrom:
+            configMapKeyRef:
+              name: user-service-config
+              key: ACCESS_JWT_EXPIRES_IN
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10

@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: user-service-dev
+  namespace: kube-system
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/sliterentz/MonoPandora.git  # Replace with your actual Git repository URL
+    targetRevision: develop
+    path: src/apps/user-service/k8s/overlays/development
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: development
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
