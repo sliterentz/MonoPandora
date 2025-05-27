@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { DataSource, DataSourceOptions } from 'typeorm';
 // import { User, RefreshToken } from './entities';
-import { RefreshTokenEntity as RefreshToken, UserEntity as User } from "@auth-lib";
+import { RefreshTokenEntity as RefreshToken, UserEntity as User, PermissionEntity as Permission, RoleEntity as Role } from "@auth-lib";
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -14,7 +14,7 @@ export const dbdatasource: DataSourceOptions = {
   password: process.env.DB_PASS,
   database: process.env.DB_NAME_DEVELOPMENT,
   // url: process.env.DATABASE_URL,
-  entities: [User, RefreshToken],
+  entities: [User, RefreshToken, Role, Permission],
   // entities: ['../apps/user-service/src/entities/*.entity.ts'],
   migrations: ['../apps/user-service/src/migrations/*.{ts,js}'],
   migrationsRun: process.env.TYPEORM_MIGRATION === 'true',

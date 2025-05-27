@@ -1,5 +1,5 @@
-import {IsEmail, IsString, IsEnum, IsNumber} from 'class-validator';
-import { IRegisterUserForm, IGrant } from '../types';
+import { IsEmail, IsString, IsNumber, IsBoolean } from 'class-validator';
+import { IRegisterUserForm } from '../types';
 
 export class AuthModel implements IRegisterUserForm {
   @IsString()
@@ -11,12 +11,12 @@ export class AuthModel implements IRegisterUserForm {
   @IsString()
   password!: string;
 
-  @IsEnum(IGrant)
-  grant!: IGrant;
+  @IsBoolean()
+  isSuperUser!: Boolean;
 
   @IsNumber()
   authConfirmToken!: number;
 
-  @IsNumber()
-  isVerrified!: number;
+  @IsBoolean()
+  isVerified!: Boolean;
 }

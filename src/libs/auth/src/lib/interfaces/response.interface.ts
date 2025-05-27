@@ -10,5 +10,7 @@ export interface FailResponse {
 }
   
 export interface HttpFailResponse {
-    readonly error: FailResponse;
+    readonly message: string;
+    readonly code: number;
+    readonly data: any;
 }

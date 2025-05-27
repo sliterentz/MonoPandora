@@ -1,38 +1,54 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-// import { AUTH_OPTIONS } from "../types/constants";
-// import { AuthModuleOption } from "./auth-apikey.strategy";
-import { JwtPayloadInterface } from '../interfaces';
+import { Injectable, Inject } from '@nestjs/common';
 import { UserEntity as User } from '../entities';
 import { AuthService } from '../auth.service';
 import { ConfigService } from '@nestjs/config';
-import { IAccessTokenPayload } from '../types';
-import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { IAccessTokenPayload, IStatus, ErrorType } from '../types';
+import { DisabledUserException, InvalidCredentialsException } from '../helpers';
+import Logger, { LoggerKey } from '@nestjs-logger/shared/lib/interfaces/logger.interface';
+import { request } from 'http';
+// import { InjectRepository } from "@nestjs/typeorm";
+// import { Repository } from "typeorm";
 
-// export type JwtPayload = { sub: number; username: string };
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    // @InjectRepository(User)
+    // private userRepository: Repository<User>,
+    @Inject(LoggerKey)
+    private logger: Logger,
     private readonly configService: ConfigService,
-    private readonly authService: AuthService,
+    private readonly authService: AuthService
     // @Inject(AUTH_OPTIONS) private readonly config: AuthModuleOption,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET'),
       // algorithms: ['RS256'],
     });
   }
 
   async validate(payload: IAccessTokenPayload): Promise<User> {
     const user = await this.authService.validateUser(payload);
+    
     if (!user) {
-      throw new UnauthorizedException();
+      // Info
+      this.logger.info('Get Unathorize Access', {
+        props: {
+          request: request.toString(), 
+          param: this.configService.get<string>('JWT_SECRET'),
+        },
+        error: new InvalidCredentialsException(),
+      });
+      throw new InvalidCredentialsException();
+    }
+    if (user.status == IStatus.Disable) {
+      throw new DisabledUserException(ErrorType.InactiveUser);
+    }
+    if (user.status == IStatus.Suspend) {
+      throw new DisabledUserException(ErrorType.BlockedUser);
     }
       return user;
   }

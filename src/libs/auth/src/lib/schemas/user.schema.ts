@@ -19,14 +19,15 @@ export const UserSchema = new EntitySchema<User>({
     password: {
       type: String,
     },
-    grant: {
-        type: Number,
-      },
+    isSuperUser: {
+      type: Boolean,
+      default: false,
+    },
     authConfirmToken: {
       type: Number,
       default: 123,
     },
-    isVerrified: {
+    isVerified: {
       type: Boolean,
       default: true,
     },

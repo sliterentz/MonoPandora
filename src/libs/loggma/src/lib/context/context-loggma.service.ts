@@ -6,7 +6,10 @@ import { Injectable } from '@nestjs/common';
 export default class ContextLoggmaService
   implements ContextStorageInterface
 {
-  constructor(private readonly cls: ClsService) {}
+
+  constructor(private readonly cls: ClsService) {
+    this.cls = cls;
+  }
 
   public get<T>(key: string): T | undefined {
     return this.cls.get(key);
@@ -16,8 +19,8 @@ export default class ContextLoggmaService
     this.cls.set(CLS_ID, id);
   }
 
-  public getContextId(): string | undefined {
-    return this.cls.getId();
+  public getContextId(): string | '' {
+    return this.cls.getId() || 'default-context-id';
   }
 
   public set<T>(key: string, value: T): void {

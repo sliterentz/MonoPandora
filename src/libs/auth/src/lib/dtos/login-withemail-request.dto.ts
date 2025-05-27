@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString } from 'class-validator';
-import { ILoginForm } from '../types';
+import { ILoginWithEmailForm } from '../types';
 
-export class LoginRequestDTO implements ILoginForm {
+export class LoginWithEmailRequestDTO implements ILoginWithEmailForm {
   @IsNotEmpty()
   @IsString()
   email!: string;

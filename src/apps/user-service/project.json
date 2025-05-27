@@ -68,6 +68,10 @@
         "commands": ["typeorm migration:run"]
       },
       "dependsOn": ["build-migration-config"]
+    },
+    "docker-build": {
+      "dependsOn": ["build"],
+      "command": "docker build -f apps/user-service/Dockerfile . -t monopando/user-service:v1"
     }
   },
   "tags": []

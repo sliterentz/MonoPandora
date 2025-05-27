@@ -1,5 +1,19 @@
 import * as winston from 'winston';
-import { LogLevel } from '@nestjs-logger/shared/lib/types/logs';
+import { LogData, LogLevel } from '@nestjs-logger/shared/lib/types/logs';
+
+// Define an interface for the log object structure
+interface LogEntry {
+  level: string;
+  message: string;
+  timestamp: string;
+  data: LogData & {
+    label?: string;
+    error?: string;
+    durationMs?: number;
+    stack?: string;
+    props?: Record<string, any>;
+  };
+}
 
 enum LogColors {
   red = '\x1b[31m',
@@ -15,29 +29,31 @@ export default class ConsoleTransport {
   public static createColorize() {
     return new winston.transports.Console({
       format: winston.format.combine(
-        winston.format.printf((log) => {
-          const color = this.mapLogLevelColor(log.level as LogLevel);
-          const prefix = `${log.data.label ? `[${log.data.label}]` : ''}`;
-          return `${this.colorize(color, prefix + '  -')} ${log.timestamp}    ${
-            log.data.correlationId
-              ? `(${this.colorize(LogColors.cyan, log.data.correlationId)})`
+        winston.format.printf((log: unknown) => {
+          // Cast the log to our defined interface
+          const typedLog = log as LogEntry;
+          const color = this.mapLogLevelColor(typedLog.level as LogLevel);
+          const prefix = `${typedLog.data.label ? `[${typedLog.data.label}]` : ''}`;
+          return `${this.colorize(color, prefix + '  -')} ${typedLog.timestamp}    ${
+            typedLog.data.correlationId
+              ? `(${this.colorize(LogColors.cyan, typedLog.data.correlationId)})`
               : ''
-          } ${this.colorize(color, log.level.toUpperCase())} ${
-            log.data.sourceClass
-              ? `${this.colorize(LogColors.cyan, `[${log.data.sourceClass}]`)}`
+          } ${this.colorize(color, typedLog.level.toUpperCase())} ${
+            typedLog.data.sourceClass
+              ? `${this.colorize(LogColors.cyan, `[${typedLog.data.sourceClass}]`)}`
               : ''
           } ${this.colorize(
             color,
-            log.message + ' - ' + (log.data.error ? log.data.error : ''),
+            typedLog.message + ' - ' + (typedLog.data.error ? typedLog.data.error : ''),
           )}${
-            log.data.durationMs !== undefined
-              ? this.colorize(color, ' +' + log.data.durationMs + 'ms')
+            typedLog.data.durationMs !== undefined
+              ? this.colorize(color, ' +' + typedLog.data.durationMs + 'ms')
               : ''
           }${
-            log.data.stack ? this.colorize(color, `  - ${log.data.stack}`) : ''
+            typedLog.data.stack ? this.colorize(color, `  - ${typedLog.data.stack}`) : ''
           }${
-            log.data.props
-              ? `\n  - Props: ${JSON.stringify(log.data.props, null, 4)}`
+            typedLog.data.props
+              ? `\n  - Props: ${JSON.stringify(typedLog.data.props, null, 4)}`
               : ''
           }`;
         }),

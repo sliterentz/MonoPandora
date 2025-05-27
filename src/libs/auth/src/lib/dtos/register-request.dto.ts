@@ -1,4 +1,4 @@
-import { IGrant } from '../types/users';
+// import { IGrant } from '../types/users';
 import {
   IsString,
   IsNotEmpty,
@@ -7,7 +7,7 @@ import {
   MaxLength,
   IsStrongPassword,
   IsNumber,
-  IsEnum
+  IsBoolean
 } from 'class-validator';
 
 export class RegisterRequestDTO {
@@ -32,15 +32,12 @@ export class RegisterRequestDTO {
   })
   password!: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  grant!: number;
+  @IsBoolean()
+  isSuperUser!: Boolean;
 
   @IsNumber()
   authConfirmToken!: number;
 
-  @IsNotEmpty()
-  @IsNumber()
-  @MaxLength(1)
-  isVerrified!: number;
-};
+  @IsBoolean()
+  isVerified!: Boolean;
+}

@@ -1,3 +1,4 @@
+import { FastifyRequest } from 'fastify';
 import { Global, Module } from '@nestjs/common';
 import { v4 } from 'uuid';
 import { ClsModule } from 'nestjs-cls';
@@ -13,7 +14,13 @@ import NestjsClsContextStorageService from '@nestjs-logger/shared/lib/context/co
       middleware: {
         mount: true,
         generateId: true,
-        idGenerator: (req: Request) => req.headers['x-correlation-id'] ?? v4(),
+        idGenerator: async (req: FastifyRequest): Promise<string> => {
+          const correlationId = req.headers['x-correlation-id'];
+          if (Array.isArray(correlationId)) {
+            return correlationId[0];
+          }
+          return correlationId ?? v4();
+        },
       },
     }),
   ],
