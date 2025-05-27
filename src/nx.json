@@ -1,8 +1,5 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
-  "affected": {
-    "defaultBase": "master"
-  },
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "sharedGlobals"],
     "production": [
@@ -36,6 +33,9 @@
     },
     "build": {
       "inputs": ["production", "^production"]
+    },
+    "e2e-ci--**/**": {
+      "dependsOn": ["^build"]
     }
   },
   "plugins": [
@@ -105,5 +105,7 @@
         "unitTestRunner": "vitest"
       }
     }
-  }
+  },
+  "nxCloudId": "68356e4f67dd535e0de4aa00",
+  "defaultBase": "master"
 }

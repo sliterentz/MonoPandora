@@ -9,7 +9,7 @@ import { RefreshTokenEntity as RefreshToken, UserEntity as User } from '../entit
 // import { RegisterRequestDTO } from '../dtos/register-request.dto';
 import { VerifyConfirmDTO } from '../dtos/verify-confirm.dto';
 import { JwtService } from '@nestjs/jwt';
-import moment from 'moment-timezone';
+import * as moment from 'moment-timezone';
 import Logger, { LoggerKey } from '@nestjs-logger/shared/lib/interfaces/logger.interface';
 import * as dotenv from 'dotenv';
 

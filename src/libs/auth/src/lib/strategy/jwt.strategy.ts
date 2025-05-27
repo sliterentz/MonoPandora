@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     @Inject(LoggerKey)
     private logger: Logger,
     private readonly configService: ConfigService,
-    private readonly authService: AuthService,
+    private readonly authService: AuthService
     // @Inject(AUTH_OPTIONS) private readonly config: AuthModuleOption,
   ) {
     super({

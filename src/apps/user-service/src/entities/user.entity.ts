@@ -39,7 +39,6 @@ export class User extends BaseEntity {
     onUpdate: 'CURRENT_TIMESTAMP(6)',
   })
   updatedAt!: Date;
-
   @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user)
   refreshTokens!: RefreshToken[];
 }

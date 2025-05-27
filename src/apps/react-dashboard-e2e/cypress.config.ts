@@ -11,8 +11,12 @@ export default defineConfig({
         default: 'nx run react-dashboard:serve',
         production: 'nx run react-dashboard:preview',
       },
-      ciWebServerCommand: 'nx run react-dashboard:serve-static',
+      ciWebServerCommand: 'nx run react-dashboard:preview',
+      ciBaseUrl: 'http://localhost:4300',
     }),
     baseUrl: 'http://localhost:4200',
+    // Please ensure you use `cy.origin()` when navigating between domains and remove this option.
+    // See https://docs.cypress.io/app/references/migration-guide#Changes-to-cyorigin
+    injectDocumentDomain: true,
   },
 });

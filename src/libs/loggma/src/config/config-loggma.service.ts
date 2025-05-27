@@ -20,10 +20,10 @@ export class ConfigLoggmaService {
   }
 
   get slackWebhookUrl(): string {
-    return process.env.SLACK_INC_WEBHOOK_URL  || 'https://slack.com/1234';
+    return process.env['SLACK_INC_WEBHOOK_URL'] || 'https://slack.com/1234';
   }
 
   private get environment(): string {
-    return process.env.NODE_ENV  || 'development';
+    return process.env['NODE_ENV']  || 'development';
   }
 }

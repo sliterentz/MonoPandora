@@ -17,16 +17,16 @@ export type IRefreshToken = {
 };
 
 export type IJwtConfig = {
-  secret: string;
+  secret?: string;
   expiresIn: string;
 };
 
 export const accessTokenConfig = (): IJwtConfig => ({
-  secret: process.env.ACCESS_TOKEN_SECRET || 'ACCESS_TOKEN',
+  secret: process.env['ACCESS_TOKEN_SECRET'] || 'ACCESS_TOKEN',
   expiresIn: '60m',
 });
 
 export const refreshTokenConfig = (): IJwtConfig => ({
-  secret: process.env.REFRESH_TOKEN_SECRET || 'REFRESH_TOKEN',
+  secret: process.env['REFRESH_TOKEN_SECRET'] || 'REFRESH_TOKEN',
   expiresIn: '7d',
 });
